@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Mersey Office Supplies Ltd",
+  "invoice_number": "IN0003904",
+  "issue_date": "2025-08-08",
+  "currency": "GBP",
+  "subtotal": "12491.95",
+  "tax": "2498.39",
+  "total": "14990.34",
+  "line_items": [
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "27",
+      "unit_price": "59.93",
+      "line_total": "1618.11"
+    },
+    {
+      "description": "Ratchet straps 50mm x 9m (4)",
+      "quantity": "7",
+      "unit_price": "447.76",
+      "line_total": "3134.32"
+    },
+    {
+      "description": "Nitrile work gloves, size L (pack 12)",
+      "quantity": "15",
+      "unit_price": "103.06",
+      "line_total": "1545.90"
+    },
+    {
+      "description": "Stretch wrap film 500mm x 300m",
+      "quantity": "38",
+      "unit_price": "162.99",
+      "line_total": "6193.62"
+    }
+  ]
+}

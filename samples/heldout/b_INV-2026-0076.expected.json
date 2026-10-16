@@ -1,0 +1,59 @@
+{
+  "vendor_name": "Sabre International GmbH",
+  "invoice_number": "INV-2026-0076",
+  "issue_date": "2026-02-13",
+  "currency": "EUR",
+  "subtotal": "175263.50",
+  "tax": "35052.70",
+  "total": "210316.20",
+  "line_items": [
+    {
+      "description": "Executive workshop: 'AI Strategy'",
+      "quantity": "20",
+      "unit_price": "389.40",
+      "line_total": "7788.00"
+    },
+    {
+      "description": "External reviewer honorarium",
+      "quantity": "2",
+      "unit_price": "31724.60",
+      "line_total": "63449.20"
+    },
+    {
+      "description": "Strategic advisory — Q1 2026 (PowerPoints not included)",
+      "quantity": "3",
+      "unit_price": "9837.20",
+      "line_total": "29511.60"
+    },
+    {
+      "description": "Data room hosting — February 2026",
+      "quantity": "1",
+      "unit_price": "9332.50",
+      "line_total": "9332.50"
+    },
+    {
+      "description": "Travel expenses (London–Vienna)",
+      "quantity": "5",
+      "unit_price": "669.50",
+      "line_total": "3347.50"
+    },
+    {
+      "description": "Compliance audit preparation (regulations may have changed since)",
+      "quantity": "1",
+      "unit_price": "14211.00",
+      "line_total": "14211.00"
+    },
+    {
+      "description": "Training materials — onboarding programme",
+      "quantity": "5",
+      "unit_price": "1899.30",
+      "line_total": "9496.50"
+    },
+    {
+      "description": "Photocopier toner (see framework agreement)",
+      "quantity": "1",
+      "unit_price": "38127.20",
+      "line_total": "38127.20"
+    }
+  ]
+}

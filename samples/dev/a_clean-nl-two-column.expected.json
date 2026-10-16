@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Waalhaven Office Supplies B.V.",
+  "invoice_number": "BS-3348",
+  "issue_date": "2025-06-13",
+  "currency": "EUR",
+  "subtotal": "41018.40",
+  "tax": "8613.86",
+  "total": "49632.26",
+  "line_items": [
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "6",
+      "unit_price": "4530.23",
+      "line_total": "27181.38"
+    },
+    {
+      "description": "Copy paper A4 80gsm, box of 5 reams",
+      "quantity": "4",
+      "unit_price": "340.04",
+      "line_total": "1360.16"
+    },
+    {
+      "description": "Stretch wrap film 500mm x 300m",
+      "quantity": "26",
+      "unit_price": "161.31",
+      "line_total": "4194.06"
+    },
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "4",
+      "unit_price": "2070.70",
+      "line_total": "8282.80"
+    }
+  ]
+}

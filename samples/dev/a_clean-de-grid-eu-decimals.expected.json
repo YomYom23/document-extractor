@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Nordhafen Workshop Supplies GmbH & Co. KG",
+  "invoice_number": "IN0089266",
+  "issue_date": "2026-04-30",
+  "currency": "EUR",
+  "subtotal": "5632.69",
+  "tax": "1070.21",
+  "total": "6702.90",
+  "line_items": [
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "1",
+      "unit_price": "1151.18",
+      "line_total": "1151.18"
+    },
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "15",
+      "unit_price": "84.60",
+      "line_total": "1269.00"
+    },
+    {
+      "description": "Hex bolts M12 x 50 galvanised (box 50)",
+      "quantity": "7",
+      "unit_price": "323.14",
+      "line_total": "2261.98"
+    },
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "7",
+      "unit_price": "135.79",
+      "line_total": "950.53"
+    }
+  ]
+}

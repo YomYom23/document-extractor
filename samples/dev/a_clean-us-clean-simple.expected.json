@@ -1,0 +1,29 @@
+{
+  "vendor_name": "Acme Industrial Supply Co",
+  "invoice_number": "ACM-100145",
+  "issue_date": "2024-03-12",
+  "currency": "USD",
+  "subtotal": "346.50",
+  "tax": "25.99",
+  "total": "372.49",
+  "line_items": [
+    {
+      "description": "Industrial grade bolts, 1/2-inch x 2-inch (pack of 100)",
+      "quantity": "4",
+      "unit_price": "48.50",
+      "line_total": "194.00"
+    },
+    {
+      "description": "Heavy-duty steel washers (pack of 200)",
+      "quantity": "2",
+      "unit_price": "32.00",
+      "line_total": "64.00"
+    },
+    {
+      "description": "Threadlocker adhesive, blue, 10ml",
+      "quantity": "6",
+      "unit_price": "14.75",
+      "line_total": "88.50"
+    }
+  ]
+}

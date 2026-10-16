@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Luangwa Packaging Ltd",
+  "invoice_number": "KN-94439",
+  "issue_date": "2025-03-18",
+  "currency": "ZMW",
+  "subtotal": "39582.40",
+  "tax": "6333.18",
+  "total": "45915.58",
+  "line_items": [
+    {
+      "description": "Toner cartridge, black, high yield",
+      "quantity": "4",
+      "unit_price": "1396.59",
+      "line_total": "5586.36"
+    },
+    {
+      "description": "Engine oil 15W-40, 20 L drum",
+      "quantity": "4",
+      "unit_price": "1303.78",
+      "line_total": "5215.12"
+    },
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "6",
+      "unit_price": "1468.38",
+      "line_total": "8810.28"
+    },
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "4",
+      "unit_price": "4992.66",
+      "line_total": "19970.64"
+    }
+  ]
+}

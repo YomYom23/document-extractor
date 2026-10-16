@@ -1,0 +1,59 @@
+{
+  "vendor_name": "Weyland-Yutani Europe S.A.",
+  "invoice_number": "INV-2026-0194",
+  "issue_date": "2026-01-28",
+  "currency": "EUR",
+  "subtotal": "444138.70",
+  "tax": "88827.74",
+  "total": "521862.97",
+  "line_items": [
+    {
+      "description": "Backup verification (annual)",
+      "quantity": null,
+      "unit_price": null,
+      "line_total": "10773.40"
+    },
+    {
+      "description": "Executive workshop: 'AI Strategy'",
+      "quantity": "2",
+      "unit_price": "11460.20",
+      "line_total": "22920.40"
+    },
+    {
+      "description": "Emergency weekend support call (45 minutes, felt longer)",
+      "quantity": null,
+      "unit_price": null,
+      "line_total": "31021.70"
+    },
+    {
+      "description": "Travel expenses (Frankfurt–Zürich)",
+      "quantity": "4",
+      "unit_price": "43918.00",
+      "line_total": "175672.00"
+    },
+    {
+      "description": "Consulting hours — Associate",
+      "quantity": null,
+      "unit_price": null,
+      "line_total": "14325.80"
+    },
+    {
+      "description": "Professional indemnity insurance — pro rata",
+      "quantity": null,
+      "unit_price": null,
+      "line_total": "32715.30"
+    },
+    {
+      "description": "Data room hosting — February 2026",
+      "quantity": "3",
+      "unit_price": "22810.50",
+      "line_total": "68431.50"
+    },
+    {
+      "description": "Server maintenance — March 2026",
+      "quantity": "3",
+      "unit_price": "29426.20",
+      "line_total": "88278.60"
+    }
+  ]
+}

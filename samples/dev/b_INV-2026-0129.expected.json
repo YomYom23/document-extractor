@@ -1,0 +1,41 @@
+{
+  "vendor_name": "Sterling Cooper Draper Pryce",
+  "invoice_number": "INV-2026-0129",
+  "issue_date": "2026-02-15",
+  "currency": "EUR",
+  "subtotal": "196147.20",
+  "tax": null,
+  "total": "196147.20",
+  "line_items": [
+    {
+      "description": "Hardware procurement — 4 workstations",
+      "quantity": "4",
+      "unit_price": "9104.76",
+      "line_total": "36419.04"
+    },
+    {
+      "description": "Emergency weekend support call (45 minutes, felt longer)",
+      "quantity": "10",
+      "unit_price": "1373.52",
+      "line_total": "13735.20"
+    },
+    {
+      "description": "Consulting hours — Senior Partner",
+      "quantity": "2",
+      "unit_price": "12015.60",
+      "line_total": "24031.20"
+    },
+    {
+      "description": "Consulting hours — Associate",
+      "quantity": "2",
+      "unit_price": "54754.20",
+      "line_total": "109508.40"
+    },
+    {
+      "description": "Retainer fee — ongoing counsel",
+      "quantity": "1",
+      "unit_price": "12453.36",
+      "line_total": "12453.36"
+    }
+  ]
+}

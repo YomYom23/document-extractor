@@ -1,0 +1,47 @@
+{
+  "vendor_name": "Highveld Tyre & Parts (Pty) Ltd",
+  "invoice_number": "013456",
+  "issue_date": "2025-07-28",
+  "currency": "ZAR",
+  "subtotal": "10208.07",
+  "tax": "1531.21",
+  "total": "11739.28",
+  "line_items": [
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "3",
+      "unit_price": "194.02",
+      "line_total": "582.06"
+    },
+    {
+      "description": "Nitrile work gloves, size L (pack 12)",
+      "quantity": "3",
+      "unit_price": "80.81",
+      "line_total": "242.43"
+    },
+    {
+      "description": "Ratchet straps 50mm x 9m (4)",
+      "quantity": "4",
+      "unit_price": "360.03",
+      "line_total": "1440.12"
+    },
+    {
+      "description": "Toner cartridge, black, high yield",
+      "quantity": "4",
+      "unit_price": "880.95",
+      "line_total": "3523.80"
+    },
+    {
+      "description": "Pallet strapping kit",
+      "quantity": "7",
+      "unit_price": "362.98",
+      "line_total": "2540.86"
+    },
+    {
+      "description": "LED work lamp 24V",
+      "quantity": "8",
+      "unit_price": "234.85",
+      "line_total": "1878.80"
+    }
+  ]
+}

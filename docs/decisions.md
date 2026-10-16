@@ -77,3 +77,18 @@ can be tested alone.
 - No arithmetic rule (subtotal + tax = total) in the schema. A model that refused inconsistent numbers could not represent a wrong extraction, so the scorer could not measure it. The check will be a separate function.
 - Pydantic turns a JSON number such as `19.99` into `Decimal("19.99")` exactly (checked on pydantic 2.14.1), so JSON input does not reintroduce float error.
 - The package is `document_extractor/` at the repo root, with `pythonpath = ["."]` in pytest config. mypy runs in strict mode.
+
+## D19. Samples and labels (`samples/`)
+- 12 synthetic invoices as `samples/<set>/<name>.pdf` + `<name>.expected.json` (an `Invoice` in JSON). `dev/` has 8, `heldout/` has 4.
+  The split was a seeded random shuffle (seed 42), not chosen by difficulty. Held-out labels are for the final comparison only: no rule is written
+  from them and the LLM prompt never contains them (D6).
+- Sources (licences checked): 8 from Invoice Extraction Benchmark v1 (CC BY 4.0), one per visibly different layout template; 4 from InvoiceBenchmark (MIT),
+  one per text layout (2 table, 1 paragraph, 1 mixed). Attribution is in `samples/ATTRIBUTION.md`. Both are synthetic, and each comes from a single generator,
+  so layout variety is lower than real supplier invoices. A third source was dropped: the Kaggle datasets need a login, and the other candidates were images.
+- Labels were drafted from the PDF text, not from the datasets' answer keys. My arithmetic checks: quantity x unit price = line total on every row, and the lines
+  sum to the subtotal. The datasets' answer keys agree on every header field and line total except one invoice (see label conventions).
+- Label conventions: values are what the page prints. Where the page prints a figure the schema has no field for (rebate, shipping, withholding), the label
+  keeps the printed subtotal, tax and total, so subtotal + tax can differ from total. Currency is the ISO code a human reader would give, using the
+  address and symbol together. Dates in the sample's own format (dd/mm or mm/dd) are read as that country's format. Where a line states only an amount
+  ("we invoice EUR 10,773.40"), quantity and unit price are `null`.
+- Left out for now: multi-page, credit notes, scans and photos, dual-currency payable invoices, and invoices whose totals do not add up.

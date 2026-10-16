@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Calanque Hardware SARL",
+  "invoice_number": "AC-87051",
+  "issue_date": "2026-03-09",
+  "currency": "EUR",
+  "subtotal": "8672.10",
+  "tax": "1734.42",
+  "total": "10406.52",
+  "line_items": [
+    {
+      "description": "Stretch wrap film 500mm x 300m",
+      "quantity": "36",
+      "unit_price": "117.54",
+      "line_total": "4231.44"
+    },
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "15",
+      "unit_price": "131.88",
+      "line_total": "1978.20"
+    },
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "9",
+      "unit_price": "88.96",
+      "line_total": "800.64"
+    },
+    {
+      "description": "Air filter element, heavy duty",
+      "quantity": "3",
+      "unit_price": "553.94",
+      "line_total": "1661.82"
+    }
+  ]
+}

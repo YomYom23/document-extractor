@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Pennine Tyre & Parts Limited",
+  "invoice_number": "IN0049923",
+  "issue_date": "2025-08-27",
+  "currency": "GBP",
+  "subtotal": "18011.58",
+  "tax": "3602.32",
+  "total": "21613.90",
+  "line_items": [
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "40",
+      "unit_price": "59.66",
+      "line_total": "2386.40"
+    },
+    {
+      "description": "LED work lamp 24V",
+      "quantity": "10",
+      "unit_price": "451.36",
+      "line_total": "4513.60"
+    },
+    {
+      "description": "Safety boots, steel toe, size 9",
+      "quantity": "6",
+      "unit_price": "794.03",
+      "line_total": "4764.18"
+    },
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "6",
+      "unit_price": "1057.90",
+      "line_total": "6347.40"
+    }
+  ]
+}
