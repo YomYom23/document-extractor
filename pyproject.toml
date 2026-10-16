@@ -1,0 +1,22 @@
+[project]
+name = "document-extractor"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.14.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.pytest.ini_options]
+# Lets tests import the `document_extractor` package from the repo root.
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
