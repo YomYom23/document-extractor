@@ -119,3 +119,17 @@ Recommended choices, pending your questions.
 - If subtotal, tax or total is `null` the check cannot run and returns `None`. A `null` tax is not treated as zero: that would be a guess (D11).
 - Only subtotal + tax = total. Summing line items against the subtotal waits until line items are scored (D12).
 - Two of the 12 samples print a rebate, so they must produce a warning even though their labels are right (D20). That is the first test.
+
+## D23. PDF reader (`document_extractor/pdf_reader.py`, step 4)
+Recommended choices, pending your questions. Checked: `pdfplumber` 0.11.10 is current on PyPI and MIT-licensed; all 12 samples are one page and have a text layer.
+- `read_pdf(pdf_path) -> PdfDocument`. `PdfDocument` holds a list of `PdfPage`; each page has `width`, `height`, `text` (for the LLM) and `words` (for the rules
+  extractor). Each `Word` has `text`, `x0`, `x1`, `top`, `bottom`. All frozen dataclasses of our own.
+- No `pdfplumber` object leaves this module. Why: swapping the library (D14) then touches one file, and `pdfplumber` returns untyped dicts that would otherwise spread
+  through code checked by `mypy --strict`.
+- Coordinates are kept as `pdfplumber` gives them: points (1/72 inch), origin at the top-left, `top` growing down the page.
+- Words, not `pdfplumber`'s ready-made lines. Its lines join side-by-side columns ("Columbus, OH 43215 Invoice #: ACM-100145"), so the rules extractor
+  needs the word positions to separate them. `text` stays for the LLM, which reads the merged lines fine.
+- A list of pages even though every sample is one page, so a two-page invoice does not need a new interface later. Multi-page extraction is still out of scope (D19).
+- If no page has any words, raise `NoTextLayerError`. Why: a scan would otherwise reach the extractors as an empty page, come back all `null`, and be scored as "missing",
+  which hides the real cause (D2: digital PDFs only).
+- Tests open the real sample PDFs and check known words and positions, plus a blank PDF for the error. Only `read_pdf` is tested; it is the module's one seam.
