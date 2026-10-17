@@ -1,0 +1,57 @@
+[
+  {
+    "text": "Brightline Tools Inc\n220 Market St, Denver, CO 80202\nSubtotal $1,150.00\nSales Tax $100.00\nTotal $1,250.00",
+    "expected": "USD",
+    "why": "US address and state abbreviation"
+  },
+  {
+    "text": "Maple Ridge Supply Ltd\n45 King St W, Toronto, ON M5H 1J8\nGST/HST No 815204966RT0001\nHST 13% $391.40\nTotal $3,402.15",
+    "expected": "CAD",
+    "why": "Ontario postcode, HST at the Ontario rate"
+  },
+  {
+    "text": "Harbourside Fittings Pty Ltd\nABN 51 824 753 556\n12 George St, Sydney NSW 2000\nGST $120.00\nTotal $1,320.00",
+    "expected": "AUD",
+    "why": "ABN, NSW, 10% GST"
+  },
+  {
+    "text": "Kowhai Electrical Ltd\n18 Queen Street, Auckland 1010, New Zealand\nGST 15% $375.07\nTotal $2,875.50",
+    "expected": "NZD",
+    "why": "New Zealand address, 15% GST"
+  },
+  {
+    "text": "Lion City Logistics Pte Ltd\n1 Raffles Place, Singapore 048616\nGST Reg No M2-1234567-8\nTotal $980.40",
+    "expected": "SGD",
+    "why": "Pte Ltd, Singapore address"
+  },
+  {
+    "text": "Victoria Peak Trading Co Ltd\n88 Queen's Road Central, Hong Kong\nTotal $15,600.00",
+    "expected": "HKD",
+    "why": "Hong Kong address"
+  },
+  {
+    "text": "Etosha Field Services CC\n14 Sam Nujoma Drive, Windhoek, Namibia\nVAT Reg No 1234567\nVAT 15% $1,098.26\nTotal $8,420.00",
+    "expected": "NAD",
+    "why": "Windhoek, Namibia"
+  },
+  {
+    "text": "Ferreteria Monterrey S.A. de C.V.\nRFC FMO850101AB1\nAv. Constitucion 300, Monterrey, N.L., Mexico\nIVA 16% $1,600.00\nTotal $11,600.00",
+    "expected": "MXN",
+    "why": "Mexican address, RFC, 16% IVA"
+  },
+  {
+    "text": "Kowhai Electrical Ltd\n18 Queen Street, Auckland 1010, New Zealand\nBill to: Bondi Cafe Group Pty Ltd, 3 Campbell Parade, Bondi Beach NSW 2026, Australia\nGST 15% $150.00\nTotal $1,150.00",
+    "expected": "NZD",
+    "why": "Bill-to is Australian, but the seller is in New Zealand and charges NZ's 15% GST (Australia's is 10%)"
+  },
+  {
+    "text": "Lakeview Parts LLC\n77 Main St, Buffalo, NY 14202, USA\nBill to: Niagara Fabrication Inc, 12 Ontario St, St. Catharines, ON, Canada\nTotal $2,175.00",
+    "expected": "USD",
+    "why": "Bill-to is Canadian; the seller is a US LLC. The hardest case: a careful reader could also say unclear"
+  },
+  {
+    "text": "Northstar Consulting\nInvoice 2041\nConsulting services, October\nTotal $640.00",
+    "expected": null,
+    "why": "No address or other clue: the right answer is unclear"
+  }
+]
