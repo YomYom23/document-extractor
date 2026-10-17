@@ -92,3 +92,8 @@ can be tested alone.
   address and symbol together. Dates in the sample's own format (dd/mm or mm/dd) are read as that country's format. Where a line states only an amount
   ("we invoice EUR 10,773.40"), quantity and unit price are `null`.
 - Left out for now: multi-page, credit notes, scans and photos, dual-currency payable invoices, and invoices whose totals do not add up.
+
+## D20. The arithmetic check is a flag, not a correctness test (amends D9)
+Two of the 12 samples print a rebate the schema has no field for, so subtotal + tax != total even when the extraction is right
+(shipping, credit applied and withholding would do the same). The check will be a separate function that reports a warning.
+It never marks an extraction wrong, and the scorer compares fields to the labels only. No `adjustments` field is added.
