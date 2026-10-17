@@ -153,6 +153,8 @@ Every rule comes from the 8 dev samples only (D19). No model is used (the Jev cu
 - Tests: `extract(pdf_path)` on each dev sample, scored with `score_invoice`; never a `wrong` field, and each sample's `missing` fields are pinned. `parse_amount`
   and `parse_date` get tables of literal inputs and outputs.
 - Expected on dev before any code: 51 of 56 header fields correct, 5 missing (US currency and date, FR date, 0129 subtotal and total), 0 wrong.
+  Measured after building: 50 correct, 6 missing, 0 wrong. The prediction missed that 0129's currency is also lost, because currency is read from the
+  total's line and 0129 has no total line.
 
 ### Open problem: ambiguous slash dates
 `09/03/2026` can be 9 March (FR) or 3 September (US). The rules extractor returns `null` for these, costing the FR and US dev dates. Candidate fixes to decide later:
