@@ -15,3 +15,6 @@ The file name after `a_` is the benchmark's document id.
 InvoiceBenchmark by Jakob Neugebauer, 2026, licensed MIT (stated in the dataset card).
 Source: https://huggingface.co/datasets/jngb-labs/InvoiceBenchmark (output/pdf/).
 The file name after `b_` is the invoice id.
+
+`dev/a_currency-nad-bare-dollar.pdf` was added later (D25) from the same Invoice Extraction Benchmark v1 source and licence;
+its SHA-256 matches the benchmark's answer file (`f0d5c7ac...0841c1`).

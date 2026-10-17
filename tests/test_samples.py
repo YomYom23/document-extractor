@@ -19,7 +19,8 @@ def all_label_paths() -> list[Path]:
 
 def test_expected_split_sizes() -> None:
     counts = Counter(path.parent.name for path in all_label_paths())
-    assert counts == {"dev": 8, "heldout": 4}
+    # dev has 9 since D25 added the bare-dollar NAD invoice.
+    assert counts == {"dev": 9, "heldout": 4}
 
 
 @pytest.mark.parametrize("label_path", all_label_paths(), ids=lambda path: path.stem)

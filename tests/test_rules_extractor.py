@@ -55,6 +55,8 @@ DEV_DIRECTORY = Path(__file__).parent.parent / "samples" / "dev"
 # Fields the rules are expected to miss on each dev sample (D24). Pinned, so a
 # rule change that finds or loses a field shows up here. Unlisted: none missed.
 EXPECTED_MISSING = {
+    # Added after the rules were written (D25): an unseen test for them.
+    "a_currency-nad-bare-dollar": {"currency"},  # bare $: the Jev stage's job
     "a_clean-us-clean-simple": {"currency", "issue_date"},  # bare $, 03/12/2024
     "a_clean-fr-right-header": {"issue_date"},  # 09/03/2026
     "b_INV-2026-0129": {"subtotal", "total", "currency"},  # only in sentences;

@@ -1,0 +1,35 @@
+{
+  "vendor_name": "Skeleton Bay Engineering Supplies (Pty) Ltd",
+  "invoice_number": "016850",
+  "issue_date": "2025-04-02",
+  "currency": "NAD",
+  "subtotal": "11070.82",
+  "tax": "1660.62",
+  "total": "12731.44",
+  "line_items": [
+    {
+      "description": "Stretch wrap film 500mm x 300m",
+      "quantity": "13",
+      "unit_price": "172.92",
+      "line_total": "2247.96"
+    },
+    {
+      "description": "Hex bolts M12 x 50 galvanised (box 50)",
+      "quantity": "5",
+      "unit_price": "412.25",
+      "line_total": "2061.25"
+    },
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "12",
+      "unit_price": "169.46",
+      "line_total": "2033.52"
+    },
+    {
+      "description": "Engine oil 15W-40, 20 L drum",
+      "quantity": "3",
+      "unit_price": "1576.03",
+      "line_total": "4728.09"
+    }
+  ]
+}
