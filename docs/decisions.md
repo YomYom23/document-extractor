@@ -175,3 +175,18 @@ A sixth part (amends D16). The rules extractor stays model-free; this stage runs
   `TYPESAFE_API_KEY` in this repo's git-ignored `.env`.
 - New data: `samples/dev/a_currency-nad-bare-dollar.pdf` (Invoice Extraction Benchmark v1, CC BY 4.0), labelled `NAD`, dev grows to 9. Added after the
   rules were written, so it is also an unseen test for them. Plus about 10 short `$` snippets with correct codes, drafted by me and checked by you.
+
+### Live run, 2026-10-17 (`uv run python -m scripts.live_currency_check`, 13 billed Jev calls)
+Jev's pick was right on all 13: every code, and `unclear` (0.95) on the snippet with no clue. Confidence was 0.94 to 1.00 except two:
+the NZ seller billing an Australian customer (NZD, 0.82) and the US seller billing a Canadian customer (USD, 0.73), which are the two cases I had
+flagged as judgment calls.
+
+| threshold | correct | missing | wrong |
+| --- | --- | --- | --- |
+| 0.5 to 0.7 | 13 | 0 | 0 |
+| 0.8 | 12 | 1 | 0 |
+| 0.9 | 11 | 2 | 0 |
+| 0.95 | 10 | 3 | 0 |
+
+Threshold stays at 0.8. No threshold produced a wrong answer, so 13 cases do not show where wrong answers start; lowering to 0.7 would gain only
+the US-to-Canada case, whose low confidence matches its real ambiguity. Revisit with more `$` invoices.
