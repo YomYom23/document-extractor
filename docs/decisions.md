@@ -97,3 +97,15 @@ can be tested alone.
 Two of the 12 samples print a rebate the schema has no field for, so subtotal + tax != total even when the extraction is right
 (shipping, credit applied and withholding would do the same). The check will be a separate function that reports a warning.
 It never marks an extraction wrong, and the scorer compares fields to the labels only. No `adjustments` field is added.
+
+## D21. Scorer design (`document_extractor/scoring.py`, step 3)
+Applies D11 and D12; the open choices below are the recommended ones, pending your questions.
+- Each header field gets one of three outcomes: `correct`, `missing` (extractor returned `null`, label has a value) or `wrong` (extractor returned
+  a value that differs from the label). If the label is `null`, a `null` is `correct` and any value is `wrong`: inventing a value the page lacks is the worst failure.
+- Header fields scored: vendor name, invoice number, issue date, currency, subtotal, tax, total. Line items stay out until later (D12).
+- Comparison: `Decimal` equality for money (`Decimal("10.0") == Decimal("10.00")`, so trailing zeros do not matter), `date` equality, exact string for invoice number and
+  currency, lower-case and collapsed-whitespace string for vendor name.
+- Results are reported as counts of correct / missing / wrong per field and overall. No single blended percentage, because D11 says wrong is worse than missing and
+  a blend would hide which one an extractor is doing.
+- Pure functions: `score_invoice(predicted, expected)` and `score_dataset(...)`. No file or PDF access inside the scorer; the CLI (later) feeds it.
+- The arithmetic warning (D20) is a separate function in its own file section and is not part of any score.
