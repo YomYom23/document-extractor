@@ -109,3 +109,13 @@ Applies D11 and D12; the open choices below are the recommended ones, pending yo
   a blend would hide which one an extractor is doing.
 - Pure functions: `score_invoice(predicted, expected)` and `score_dataset(...)`. No file or PDF access inside the scorer; the CLI (later) feeds it.
 - The arithmetic warning (D20) is a separate function in its own file section and is not part of any score.
+
+## D22. Arithmetic warning (`document_extractor/arithmetic_check.py`; built before step 4, implements D20)
+Recommended choices, pending your questions.
+- Own module, not part of `scoring.py`: it needs no label, so the CLI can run it on a real extraction with no expected answer. The scorer never imports it (D20).
+- `arithmetic_warning(invoice) -> str | None`: a message saying which numbers disagree, or `None` when they agree. Alternative: return a bool. A message is better because
+  a bare "failed" does not tell a reader what to look at.
+- Exact `Decimal` comparison, no tolerance (D10): the page prints rounded figures, so a correct extraction adds up to the cent. A tolerance would hide a real one-cent misread.
+- If subtotal, tax or total is `null` the check cannot run and returns `None`. A `null` tax is not treated as zero: that would be a guess (D11).
+- Only subtotal + tax = total. Summing line items against the subtotal waits until line items are scored (D12).
+- Two of the 12 samples print a rebate, so they must produce a warning even though their labels are right (D20). That is the first test.
