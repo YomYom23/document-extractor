@@ -133,3 +133,27 @@ Recommended choices, pending your questions. Checked: `pdfplumber` 0.11.10 is cu
 - If no page has any words, raise `NoTextLayerError`. Why: a scan would otherwise reach the extractors as an empty page, come back all `null`, and be scored as "missing",
   which hides the real cause (D2: digital PDFs only).
 - Tests open the real sample PDFs and check known words and positions, plus a blank PDF for the error. Only `read_pdf` is tested; it is the module's one seam.
+
+## D24. Rules extractor (`document_extractor/rules_extractor.py`, step 5; grilling Q24 to Q31)
+Every rule comes from the 8 dev samples only (D19). No model is used (the Jev currency resolver is a separate stage, D25).
+- Scope: header fields only. `line_items` is `null` until line items are scored (D12).
+- Lines: words are on the same line when they overlap vertically by at least 60% of the shorter word's height (measured on dev: same-line pairs at least 71%,
+  different lines at most 48%; label and value `top` can differ by 2.9 pt, so a fixed point tolerance would be fragile). A line is cut into segments
+  (visual columns) where the gap between words exceeds 12 pt (measured: spaces at most 5.4 pt, column gaps at least 24.1 pt).
+- Invoice number and issue date: a label ending in a colon (`Invoice No:`, `Invoice Number:`, `Invoice #:`, `Date:`) found anywhere in a line, because the `b_` samples
+  have no columns. The value is the text after it in the same segment, or the next segment if the label ends its segment. `Due Date:` and `Due:` never count.
+- Subtotal, tax, total: the label (`Subtotal`; `Tax`, `Sales Tax`, `VAT`, `MwSt`, `TVA`, `BTW`; `Total`) must start a segment, and the value is the first amount to its right on
+  that line. Why not anywhere in the line: `b_INV-2026-0129`'s sentence "The subtotal including VAT is EUR 196,147.20" would also be read as the tax, a wrong value. Starting
+  a segment leaves 0129's subtotal and total missing instead, which D11 prefers.
+- Amounts are parsed one at a time: the last `.` or `,` followed by exactly two digits at the end is the decimal point; other `.`, `,` and spaces are thousands separators.
+  Without exactly two decimals it is not an amount, so `VAT No: 4334037646` is never read as tax.
+- Currency, from the total's line: an ISO code (`EUR`) wins; otherwise `€` = EUR, `£` = GBP, a leading `R` = ZAR; a bare `$` gives `null` (D25 resolves it).
+- Dates: dotted dates are day.month.year; month names are unambiguous; slash dates are decided by a part over 12, and are `null` when both parts are 12 or under.
+- Vendor name: the first segment from the top that is not a title (`INVOICE`, `TAX INVOICE`) or logo initials (three capitals or fewer), cut before any label.
+- Tests: `extract(pdf_path)` on each dev sample, scored with `score_invoice`; never a `wrong` field, and each sample's `missing` fields are pinned. `parse_amount`
+  and `parse_date` get tables of literal inputs and outputs.
+- Expected on dev before any code: 51 of 56 header fields correct, 5 missing (US currency and date, FR date, 0129 subtotal and total), 0 wrong.
+
+### Open problem: ambiguous slash dates
+`09/03/2026` can be 9 March (FR) or 3 September (US). The rules extractor returns `null` for these, costing the FR and US dev dates. Candidate fixes to decide later:
+a country signal from the address or phone prefix, or a Jev resolver stage like the currency one (D25), with the page text as state.
