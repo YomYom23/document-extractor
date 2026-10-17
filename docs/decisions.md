@@ -159,3 +159,19 @@ Every rule comes from the 8 dev samples only (D19). No model is used (the Jev cu
 ### Open problem: ambiguous slash dates
 `09/03/2026` can be 9 March (FR) or 3 September (US). The rules extractor returns `null` for these, costing the FR and US dev dates. Candidate fixes to decide later:
 a country signal from the address or phone prefix, or a Jev resolver stage like the currency one (D25), with the page text as state.
+
+## D25. Jev currency resolver (`document_extractor/currency_resolver.py`, step 5b; grilling Q32 to Q38 and the earlier agreement)
+A sixth part (amends D16). The rules extractor stays model-free; this stage runs after it. The final comparison has three rows: rules, rules + Jev currency, LLM.
+- Runs only when the rules extractor's currency is `null` and the page has a `$` amount. Other lost currencies (0129, no total line) are a total-finding
+  problem, not this stage's.
+- One Jev `Choice` over USD, CAD, AUD, NZD, SGD, HKD, NAD, MXN, plus `unclear`. A code outside the list cannot come back, so the worst case is missing.
+- State is the whole page text: phone prefix, email domain and both addresses are the clues, and the question says the currency is the one the amounts
+  are written in (the bill-to country can differ). Cost per invoice is negligible ($0.042 per million input tokens).
+- The answer is used only when it is a code (not `unclear`) with confidence at least 0.8. Calibration is the vendor's claim; the final threshold is set
+  from the live snippet run and recorded here.
+- A Jev failure leaves the currency `null` and the extraction carries on: an outage shows up as missing fields, never as a crash or a guess.
+- `document_extractor/jev.py` is a trimmed copy of lead-bot's wrapper (Choice only), not an import across repos. Dependency `typesafe-sdk>=0.7.5,<0.8`.
+- Tests use a fake `ask` function. A separate, billed live script runs the real Jev on the snippets and the `$` samples, only on request, with
+  `TYPESAFE_API_KEY` in this repo's git-ignored `.env`.
+- New data: `samples/dev/a_currency-nad-bare-dollar.pdf` (Invoice Extraction Benchmark v1, CC BY 4.0), labelled `NAD`, dev grows to 9. Added after the
+  rules were written, so it is also an unseen test for them. Plus about 10 short `$` snippets with correct codes, drafted by me and checked by you.
