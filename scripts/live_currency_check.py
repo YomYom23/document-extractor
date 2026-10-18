@@ -12,7 +12,6 @@ wrong at several thresholds, so D25's threshold can be set from evidence.
 """
 
 import json
-import os
 from pathlib import Path
 
 from document_extractor.currency_resolver import (
@@ -23,23 +22,11 @@ from document_extractor.currency_resolver import (
 from document_extractor.jev import Jev
 from document_extractor.pdf_reader import read_pdf
 from document_extractor.schema import Invoice
+from scripts.dotenv_key import load_key_from_dotenv
 
 REPO_ROOT = Path(__file__).parent.parent
 THRESHOLDS = (0.5, 0.6, 0.7, 0.8, 0.9, 0.95)
 DOLLAR_SAMPLES = ("a_clean-us-clean-simple", "a_currency-nad-bare-dollar")
-
-
-def load_api_key_from_dotenv() -> None:
-    """Put TYPESAFE_API_KEY from .env into the environment, never printing it."""
-    dotenv_path = REPO_ROOT / ".env"
-    if not dotenv_path.exists():
-        raise SystemExit("No .env in the repo root: add TYPESAFE_API_KEY=... there.")
-    for line in dotenv_path.read_text(encoding="utf-8").splitlines():
-        name, separator, value = line.partition("=")
-        if separator and name.strip() == "TYPESAFE_API_KEY":
-            os.environ["TYPESAFE_API_KEY"] = value.strip().strip('"')
-    if not os.environ.get("TYPESAFE_API_KEY"):
-        raise SystemExit("TYPESAFE_API_KEY is missing or empty in .env.")
 
 
 def test_cases() -> list[tuple[str, str, str | None]]:
@@ -61,7 +48,7 @@ def test_cases() -> list[tuple[str, str, str | None]]:
 
 
 def main() -> None:
-    load_api_key_from_dotenv()
+    load_key_from_dotenv("TYPESAFE_API_KEY")
     jev = Jev()
     results = []
     for name, page_text, expected in test_cases():

@@ -1,0 +1,175 @@
+import json
+from datetime import date
+from decimal import Decimal
+
+import httpx2
+import pytest
+from openai import OpenAI
+from pydantic import ValidationError
+
+from document_extractor.llm_extractor import (
+    LlmExtractionError,
+    LlmExtractor,
+    LlmInvoice,
+    to_invoice,
+)
+
+
+def test_money_strings_become_exact_decimals() -> None:
+    llm_invoice = LlmInvoice(
+        vendor_name="Acme Industrial Supply Co",
+        invoice_number="ACM-100145",
+        issue_date=date(2024, 3, 12),
+        currency="USD",
+        subtotal="346.50",
+        tax="25.99",
+        total="372.49",
+    )
+    invoice = to_invoice(llm_invoice)
+    assert invoice.total == Decimal("372.49")
+    assert invoice.subtotal == Decimal("346.50")
+    assert invoice.vendor_name == "Acme Industrial Supply Co"
+    assert invoice.issue_date == date(2024, 3, 12)
+    assert invoice.line_items is None  # header fields only (D26)
+
+
+def test_nulls_stay_null() -> None:
+    llm_invoice = LlmInvoice(
+        vendor_name=None,
+        invoice_number=None,
+        issue_date=None,
+        currency=None,
+        subtotal=None,
+        tax=None,
+        total=None,
+    )
+    assert to_invoice(llm_invoice).model_dump() == {
+        "vendor_name": None,
+        "invoice_number": None,
+        "issue_date": None,
+        "currency": None,
+        "subtotal": None,
+        "tax": None,
+        "total": None,
+        "line_items": None,
+    }
+
+
+@pytest.mark.parametrize("printed", ["$12,731.44", "12731.4", "12.731,44"])
+def test_money_must_be_plain_two_decimal_text(printed: str) -> None:
+    # The same pattern the API enforces while the model writes (D26), so a
+    # reply that slipped past it would still be rejected here.
+    with pytest.raises(ValidationError):
+        LlmInvoice(
+            vendor_name=None,
+            invoice_number=None,
+            issue_date=None,
+            currency=None,
+            subtotal=None,
+            tax=None,
+            total=printed,
+        )
+
+
+# --- Contract tests: the real OpenAI SDK, only the HTTP layer faked ----------
+
+ACME_JSON = (
+    '{"vendor_name": "Acme Industrial Supply Co", "invoice_number": "ACM-100145",'
+    ' "issue_date": "2024-03-12", "currency": "USD", "subtotal": "346.50",'
+    ' "tax": "25.99", "total": "372.49"}'
+)
+
+
+def response_body(
+    content: list[dict[str, object]],
+    status: str = "completed",
+    incomplete_reason: str | None = None,
+) -> dict[str, object]:
+    """The smallest Responses API body the SDK parses."""
+    return {
+        "id": "resp_test",
+        "object": "response",
+        "created_at": 1760000000,
+        "model": "gpt-6-luna",
+        "status": status,
+        "incomplete_details": (
+            {"reason": incomplete_reason} if incomplete_reason else None
+        ),
+        "output": [
+            {
+                "type": "message",
+                "id": "msg_test",
+                "role": "assistant",
+                "status": status,
+                "content": content,
+            }
+        ],
+        "parallel_tool_calls": True,
+        "tool_choice": "auto",
+        "tools": [],
+    }
+
+
+def text_content(text: str) -> list[dict[str, object]]:
+    return [{"type": "output_text", "text": text, "annotations": []}]
+
+
+def extractor_answering(
+    status_code: int, body: object, sent: list[httpx2.Request]
+) -> LlmExtractor:
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        sent.append(request)
+        return httpx2.Response(status_code, json=body)
+
+    client = OpenAI(
+        api_key="test-key",
+        http_client=httpx2.Client(transport=httpx2.MockTransport(handle)),
+        max_retries=0,  # the HTTP 500 test should fail at once, not back off
+    )
+    return LlmExtractor(client)
+
+
+def test_sends_the_page_and_settings_and_parses_the_answer() -> None:
+    sent: list[httpx2.Request] = []
+    extractor = extractor_answering(200, response_body(text_content(ACME_JSON)), sent)
+
+    invoice = extractor.extract_from_text("Acme Industrial Supply Co ... TOTAL $372.49")
+
+    assert invoice.total == Decimal("372.49")
+    assert invoice.currency == "USD"
+    request_body = json.loads(sent[0].content)
+    assert request_body["model"] == "gpt-6-luna"
+    assert request_body["input"] == "Acme Industrial Supply Co ... TOTAL $372.49"
+    assert request_body["reasoning"] == {"effort": "low"}
+    assert request_body["max_output_tokens"] == 4000
+    assert request_body["store"] is False
+    sent_format = request_body["text"]["format"]
+    assert sent_format["type"] == "json_schema"
+    assert sent_format["strict"] is True
+    total_schema = sent_format["schema"]["properties"]["total"]["anyOf"][0]
+    assert total_schema["pattern"] == r"^-?\d+\.\d{2}$"
+
+
+def test_a_refusal_is_a_failure_not_an_empty_invoice() -> None:
+    refusal: list[dict[str, object]] = [
+        {"type": "refusal", "refusal": "I can't help with that."}
+    ]
+    with pytest.raises(LlmExtractionError):
+        extractor_answering(200, response_body(refusal), []).extract_from_text("x")
+
+
+def test_a_reply_cut_off_mid_json_is_a_failure() -> None:
+    body = response_body(
+        text_content(ACME_JSON[:40]),
+        status="incomplete",
+        incomplete_reason="max_output_tokens",
+    )
+    with pytest.raises(LlmExtractionError):
+        extractor_answering(200, body, []).extract_from_text("x")
+
+
+def test_a_server_error_is_a_failure() -> None:
+    with pytest.raises(LlmExtractionError):
+        extractor_answering(500, {"error": {"message": "boom"}}, []).extract_from_text(
+            "x"
+        )
