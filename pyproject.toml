@@ -3,6 +3,7 @@ name = "document-extractor"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "openai>=3.34,<4",
     "pdfplumber>=0.11.10",
     "pydantic>=2.14.1",
     "typesafe-sdk>=0.7.5,<0.8",

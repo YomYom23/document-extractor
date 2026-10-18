@@ -190,3 +190,23 @@ flagged as judgment calls.
 
 Threshold stays at 0.8. No threshold produced a wrong answer, so 13 cases do not show where wrong answers start; lowering to 0.7 would gain only
 the US-to-Canada case, whose low confidence matches its real ambiguity. Revisit with more `$` invoices.
+
+## D26. LLM extractor (`document_extractor/llm_extractor.py`, step 6; grilling Q39 to Q46)
+Checked against developers.openai.com on 2026-10-17: `openai` 3.34.0 is current; `client.responses.parse(model=, input=, text_format=<Pydantic model>)`
+returns `response.output_parsed`; strict structured outputs need every field `required` and `additionalProperties: false`, and support `pattern` and
+`format: date` on strings. The 3.x SDK is built on `httpx2`.
+- Model `gpt-6-luna` ($0.10 / $0.50 per million input / output tokens; a full 13-invoice run is estimated under $0.02). The model id is one setting, so a
+  `gpt-6.1-sol` row can be added later.
+- The model fills its own schema, `LlmInvoice`, not `Invoice` (amends D10). Why: the SDK turns a `Decimal` field into "number or any string" with no pattern,
+  so `"$12,731.44"` would pass the API and then fail our validation. In `LlmInvoice` money is a string matching `^-?\d+\.\d{2}$` and currency matches
+  `^[A-Z]{3}$`; the API enforces both while the model writes. Code converts it to `Invoice`.
+- Header fields only; `line_items` is `null`, as in the rules extractor (D24).
+- Input is the `pdf_reader` page text, the same input the rules extractor gets, so the comparison measures extraction and not PDF reading.
+- Prompt: instructions only, no examples. They are D19's label conventions (printed values, ISO currency from symbol and address, the invoice's own date
+  format, `null` when not on the page, D11). No sample text, dev or held-out, appears in the prompt (D6).
+- Request: `reasoning={"effort": "low"}`, `max_output_tokens=4000` (reasoning tokens count against it), `store=False`.
+- An API error, a refusal or an incomplete reply raises `LlmExtractionError`. The scoring run counts that invoice's fields as missing and reports the number
+  of failed calls separately. A failure never becomes guessed values.
+- Tests: contract tests drive the real SDK with only the HTTP layer mocked (request body, parsed reply, refusal, incomplete reply, HTTP 500); unit tests
+  for the `LlmInvoice` to `Invoice` conversion. The billed live run covers the 9 dev invoices only, on request, with `OPENAI_API_KEY` in `.env`.
+  A monthly budget is set on the OpenAI project (D8).
