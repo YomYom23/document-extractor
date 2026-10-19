@@ -13,6 +13,7 @@ from document_extractor.llm_extractor import (
     LlmInvoice,
     to_invoice,
 )
+from document_extractor.token_usage import TokenUsage
 
 
 def test_money_strings_become_exact_decimals() -> None:
@@ -122,6 +123,7 @@ def response_body(
     content: list[dict[str, object]],
     status: str = "completed",
     incomplete_reason: str | None = None,
+    usage: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """The smallest Responses API body the SDK parses."""
     return {
@@ -145,6 +147,7 @@ def response_body(
         "parallel_tool_calls": True,
         "tool_choice": "auto",
         "tools": [],
+        "usage": usage,
     }
 
 
@@ -218,3 +221,52 @@ def test_a_server_error_is_a_failure() -> None:
         extractor_answering(500, {"error": {"message": "boom"}}, []).extract_from_text(
             "x"
         )
+
+
+# Shaped like the API's `usage`; output_tokens already includes reasoning.
+USAGE = {
+    "input_tokens": 1200,
+    "input_tokens_details": {"cached_tokens": 0},
+    "output_tokens": 300,
+    "output_tokens_details": {"reasoning_tokens": 180},
+    "total_tokens": 1500,
+}
+
+
+def test_the_usage_of_the_last_call_is_kept() -> None:
+    # For the cost report in `score` (D29, Q59).
+    body = response_body(text_content(ACME_JSON), usage=USAGE)
+    extractor = extractor_answering(200, body, [])
+    assert extractor.last_usage is None  # no call yet
+    extractor.extract_from_text("x")
+    assert extractor.last_usage == TokenUsage(input_tokens=1200, output_tokens=300)
+
+
+def test_a_refused_reply_still_reports_its_billed_usage() -> None:
+    refusal: list[dict[str, object]] = [
+        {"type": "refusal", "refusal": "I can't help with that."}
+    ]
+    extractor = extractor_answering(200, response_body(refusal, usage=USAGE), [])
+    with pytest.raises(LlmExtractionError):
+        extractor.extract_from_text("x")
+    assert extractor.last_usage == TokenUsage(input_tokens=1200, output_tokens=300)
+
+
+def test_a_failed_call_does_not_keep_the_previous_usage() -> None:
+    replies = iter([(200, response_body(text_content(ACME_JSON), usage=USAGE))])
+
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        # First call answers; any later call is a server error.
+        status_code, body = next(replies, (500, {"error": {"message": "boom"}}))
+        return httpx2.Response(status_code, json=body)
+
+    client = OpenAI(
+        api_key="test-key",
+        http_client=httpx2.Client(transport=httpx2.MockTransport(handle)),
+        max_retries=0,
+    )
+    extractor = LlmExtractor(client)
+    extractor.extract_from_text("x")
+    with pytest.raises(LlmExtractionError):
+        extractor.extract_from_text("x")
+    assert extractor.last_usage is None  # nothing came back for this call

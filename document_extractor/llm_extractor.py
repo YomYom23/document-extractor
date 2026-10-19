@@ -15,8 +15,13 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, Validation
 
 from document_extractor.pdf_reader import read_pdf
 from document_extractor.schema import Invoice
+from document_extractor.token_usage import TokenUsage
 
 DEFAULT_MODEL = "gpt-6-luna"  # D26, Q39
+# gpt-6-luna's prices in dollars per million tokens, checked 2026-10-17 (D26).
+# Tied to DEFAULT_MODEL: a different model needs its own prices here.
+INPUT_DOLLARS_PER_MILLION_TOKENS = 0.10
+OUTPUT_DOLLARS_PER_MILLION_TOKENS = 0.50
 
 # D19's label conventions, so the model follows the rules the labels follow.
 # Instructions only, no examples: examples drawn from samples would tune it to
@@ -120,6 +125,9 @@ class LlmExtractor:
         # the environment. Tests pass a client with a fake HTTP layer.
         self._client = client if client is not None else OpenAI()
         self._model = model
+        # The token counts of the most recent call, for `score`'s cost report
+        # (D29). None before any call and after a call that returned nothing.
+        self.last_usage: TokenUsage | None = None
 
     def extract(self, pdf_path: Path) -> Invoice:
         """Same signature as `rules_extractor.extract` (D5), same input text (D26)."""
@@ -127,6 +135,9 @@ class LlmExtractor:
         return self.extract_from_text(page_text)
 
     def extract_from_text(self, page_text: str) -> Invoice:
+        # Cleared first, so a failed call cannot leave the previous call's
+        # tokens behind to be counted twice.
+        self.last_usage = None
         try:
             response = self._client.responses.parse(
                 model=self._model,
@@ -150,6 +161,13 @@ class LlmExtractor:
                 f"reply did not fit the schema: {error}"
             ) from error
 
+        # Recorded before the status checks: a refused or cut-off reply was
+        # still billed. output_tokens already includes the reasoning tokens.
+        if response.usage is not None:
+            self.last_usage = TokenUsage(
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+            )
         if response.status == "incomplete":
             reason = (
                 response.incomplete_details.reason

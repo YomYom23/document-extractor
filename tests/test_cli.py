@@ -4,12 +4,21 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from typesafe_sdk import Choice, ChoiceAnswer
 
-from document_extractor.cli import main
+from document_extractor.cli import (
+    CallMeter,
+    format_meter,
+    main,
+    metered_ask,
+    metered_llm,
+)
+from document_extractor.jev import JevError
 from document_extractor.llm_extractor import LlmExtractionError
 from document_extractor.pdf_reader import NoTextLayerError
 from document_extractor.schema import Invoice
 from document_extractor.scoring import Outcome, score_invoice
+from document_extractor.token_usage import TokenUsage
 
 DEV_DIRECTORY = Path(__file__).parent.parent / "samples" / "dev"
 GERMAN_PDF = DEV_DIRECTORY / "a_clean-de-grid-eu-decimals.pdf"
@@ -156,3 +165,99 @@ def test_a_failed_extraction_scores_as_missing_and_is_counted(
     assert "9 invoices, 9 failed extractions" in printed.out
     # 62 missing, not 63: 0129's label has no tax, so a null tax is correct.
     assert "overall         correct 1  missing 62  wrong 0" in printed.out
+
+
+# --- call meters: time, tokens and Jev visibility (D29, Q59, Q60) -------------
+
+
+class FakeJev:
+    """Has what `metered_ask` reads: `ask` and the last call's usage."""
+
+    def __init__(self) -> None:
+        self.last_usage: TokenUsage | None = None
+        self.fail_next = False
+
+    def ask(
+        self, state: str, questions: Mapping[str, Choice]
+    ) -> Mapping[str, ChoiceAnswer]:
+        if self.fail_next:
+            self.last_usage = None
+            raise JevError("HTTP 500")
+        self.last_usage = TokenUsage(input_tokens=328, output_tokens=34)
+        return {}
+
+
+def test_jev_calls_failures_and_tokens_are_counted() -> None:
+    meter = CallMeter()
+    jev = FakeJev()
+    ask = metered_ask(jev, meter)
+
+    ask("page text", {})
+    jev.fail_next = True
+    with pytest.raises(JevError):  # still raised: the resolver handles it (D25)
+        ask("page text", {})
+
+    assert meter == CallMeter(
+        calls=2, failed_calls=1, input_tokens=328, output_tokens=34
+    )
+
+
+class FakeLlm:
+    """Has what `metered_llm` reads: `extract` and the last call's usage."""
+
+    def __init__(self, usage: TokenUsage | None, error: Exception | None) -> None:
+        self.last_usage: TokenUsage | None = None
+        self.usage = usage
+        self.error = error
+
+    def extract(self, pdf_path: Path) -> Invoice:
+        self.last_usage = self.usage
+        if self.error is not None:
+            raise self.error
+        return Invoice()
+
+
+def test_llm_replies_and_tokens_are_counted_even_when_extraction_fails() -> None:
+    meter = CallMeter()
+    usage = TokenUsage(input_tokens=1200, output_tokens=300)
+    metered_llm(FakeLlm(usage, error=None), meter)(GERMAN_PDF)
+    # A refused reply raises, but it came back and was billed.
+    refused = metered_llm(FakeLlm(usage, LlmExtractionError("refused")), meter)
+    with pytest.raises(LlmExtractionError):
+        refused(GERMAN_PDF)
+    # An HTTP error brings no reply, so there is nothing to count.
+    broken = metered_llm(FakeLlm(None, LlmExtractionError("HTTP 500")), meter)
+    with pytest.raises(LlmExtractionError):
+        broken(GERMAN_PDF)
+
+    assert meter == CallMeter(calls=2, input_tokens=2400, output_tokens=600)
+
+
+def test_the_llm_line_prices_the_tokens() -> None:
+    meter = CallMeter(calls=3, input_tokens=1200, output_tokens=300)
+    # 1200 x $0.10 / 1M + 300 x $0.50 / 1M = $0.00012 + $0.00015
+    assert format_meter("llm", meter) == (
+        "llm             3 replies, 1200 input + 300 output tokens, "
+        "$0.000270 at gpt-6-luna prices (cached input not discounted)"
+    )
+
+
+def test_the_jev_line_shows_calls_failures_and_unreported_tokens() -> None:
+    meter = CallMeter(
+        calls=2,
+        failed_calls=1,
+        input_tokens=328,
+        output_tokens=34,
+        calls_without_token_counts=1,
+    )
+    assert format_meter("rules-jev", meter) == (
+        "jev             2 calls, 1 failed, 328 input + 34 output tokens, "
+        "1 without token counts"
+    )
+
+
+def test_score_reports_the_time_per_invoice(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    main(["score"])
+    assert "s per invoice" in capsys.readouterr().out

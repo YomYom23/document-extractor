@@ -11,6 +11,7 @@ import pytest
 from typesafe_sdk import Choice, RetryPolicy, TypeSafeClient
 
 from document_extractor.jev import Jev, JevError
+from document_extractor.token_usage import TokenUsage
 
 DOCS_RESPONSE = {
     "model": "jev-1.13.0",
@@ -77,3 +78,20 @@ def test_a_missing_answer_is_an_error_not_a_default() -> None:
 def test_a_server_error_becomes_jev_error() -> None:
     with pytest.raises(JevError):
         jev_answering(500, {"error": "boom"}, []).ask("my parcel is late", QUESTIONS)
+
+
+def test_the_usage_of_the_last_call_is_kept() -> None:
+    # For the cost and size report in `score` (D29, Q59).
+    jev = jev_answering(200, DOCS_RESPONSE, [])
+    assert jev.last_usage is None  # no call yet
+    jev.ask("my parcel is late", QUESTIONS)
+    assert jev.last_usage == TokenUsage(input_tokens=328, output_tokens=34)
+
+
+def test_usage_the_api_leaves_out_is_none_not_zero() -> None:
+    # The SDK requires the `usage` object but each count in it may be absent.
+    body = {**DOCS_RESPONSE, "usage": {}}
+    jev = jev_answering(200, body, [])
+    jev.ask("my parcel is late", QUESTIONS)
+    # Unknown is not zero: a 0 would make the token total look complete.
+    assert jev.last_usage == TokenUsage(input_tokens=None, output_tokens=None)

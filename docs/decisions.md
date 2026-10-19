@@ -275,3 +275,20 @@ fix later. Any new path that can produce a `null` (including the CLI's handling 
 Both rules misses are `a_clean-zm-banner` (Zambia): `Date: 18-Mar-2025` is a format `parse_date` does not know (null-sources N5), and the
 currency is printed only as `K` (kwacha, label ZMW), which `detect_currency` does not know (N12). Jev was not called: the page has no `$`
 amount (N14), so rules-jev equals rules here. The score report does not show whether Jev was called or failed; that was checked by hand.
+
+## D29. Comparison write-up (`docs/comparison.md`, step 8; grilling Q57 to Q63)
+- Lives in `docs/comparison.md`. Contents: correct / missing / wrong per extractor on dev and held-out, totals and per field; every miss traced to
+  its `docs/null-sources.md` entry; cost and time per invoice; what changed on the way (D25 threshold, D26 date fix); limits (synthetic samples
+  from two generators, 4 held-out invoices, how many runs).
+- Extractors are ranked on accuracy only: wrong first, then missing (D11). Cost and time are reported beside the ranking, never folded into it.
+- `score` measures instead of estimating (Q59): wall time per invoice for every extractor; for `llm`, the input and output tokens the API reports
+  per reply (`response.usage`; output includes reasoning tokens), priced at D26's $0.10 / $0.50 per million. Cached-input discounts are ignored,
+  so the cost is an upper bound. A reply that fails schema validation raises before its usage can be read, so its tokens are not counted.
+  `LlmExtractor` exposes the usage of its last call as `last_usage`.
+- `score --extractor rules-jev` prints how many times Jev was asked and how many calls failed (Q60). The CLI wraps the `ask` function it hands to
+  the resolver; `resolve_currency` is unchanged. Jev's SDK reports token usage too (`SystemOneResponse.usage`, each count `None` when the API
+  leaves it out), so `Jev` exposes `last_usage` and `score` prints Jev's tokens. Only D25's input price is known, so Jev's cost is not priced.
+- `llm` and `rules-jev` run 3 times on all 13 invoices before the write-up (Q61): at most 39 OpenAI and 6 Jev calls.
+- Extractors are frozen at the commit the runs use (Q62). The held-out set has now been seen, so fixing anything it exposed (N5 `18-Mar-2025`,
+  N12 `K`) would tune the rules to it; such fixes are later work, measured on new held-out samples.
+- The write-up ends with a verdict, backed by the numbers, on whether a hybrid extractor is justified (D5, Q63). Building one is a separate decision.

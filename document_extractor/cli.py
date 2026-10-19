@@ -7,18 +7,33 @@ scoring in `scoring.py`, so everything here is wiring and printing.
 import argparse
 import os
 import sys
+import time
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
+
+from typesafe_sdk import Choice, ChoiceAnswer
 
 from document_extractor import rules_extractor
 from document_extractor.arithmetic_check import arithmetic_warning
-from document_extractor.currency_resolver import extract_with_currency_resolver
-from document_extractor.jev import Jev
-from document_extractor.llm_extractor import LlmExtractionError, LlmExtractor
+from document_extractor.currency_resolver import (
+    AskJev,
+    extract_with_currency_resolver,
+)
+from document_extractor.jev import Jev, JevError
+from document_extractor.llm_extractor import (
+    DEFAULT_MODEL,
+    INPUT_DOLLARS_PER_MILLION_TOKENS,
+    OUTPUT_DOLLARS_PER_MILLION_TOKENS,
+    LlmExtractionError,
+    LlmExtractor,
+)
 from document_extractor.pdf_reader import NoTextLayerError
 from document_extractor.schema import Invoice
 from document_extractor.scoring import Outcome, score_dataset, score_invoice
+from document_extractor.token_usage import TokenUsage
 
 # Every extractor has this shape (D5), so the CLI treats the three alike.
 Extract = Callable[[Path], Invoice]
@@ -37,6 +52,76 @@ class CliError(Exception):
     """A problem the user can fix (a missing file or key): message, exit 1."""
 
 
+@dataclass
+class CallMeter:
+    """What one run spent on a billed model (D29). Reported, never scored."""
+
+    calls: int = 0
+    failed_calls: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    # Calls whose reply left out a token count; the totals then fall short.
+    calls_without_token_counts: int = 0
+
+    def record(self, usage: TokenUsage) -> None:
+        if usage.input_tokens is None or usage.output_tokens is None:
+            self.calls_without_token_counts += 1
+        self.input_tokens += usage.input_tokens or 0
+        self.output_tokens += usage.output_tokens or 0
+
+
+# What the meters need from Jev and the LLM extractor. Protocols, not the real
+# classes, so tests can pass small fakes with no network.
+class UsageReportingJev(Protocol):
+    last_usage: TokenUsage | None
+
+    def ask(
+        self, state: str, questions: Mapping[str, Choice]
+    ) -> Mapping[str, ChoiceAnswer]: ...
+
+
+class UsageReportingExtractor(Protocol):
+    last_usage: TokenUsage | None
+
+    def extract(self, pdf_path: Path) -> Invoice: ...
+
+
+def metered_ask(jev: UsageReportingJev, meter: CallMeter) -> AskJev:
+    """`jev.ask`, counting calls, failures and tokens (Q60). The resolver
+    still sees every JevError, so it still leaves the currency null (D25)."""
+
+    def ask(state: str, questions: Mapping[str, Choice]) -> Mapping[str, ChoiceAnswer]:
+        meter.calls += 1
+        try:
+            return jev.ask(state, questions)
+        except JevError:
+            meter.failed_calls += 1
+            raise
+        finally:
+            # `finally` runs on success and failure alike: a reply that came
+            # back and was then rejected was still billed.
+            if jev.last_usage is not None:
+                meter.record(jev.last_usage)
+
+    return ask
+
+
+def metered_llm(llm: UsageReportingExtractor, meter: CallMeter) -> Extract:
+    """`llm.extract`, counting the replies that came back and their tokens
+    (Q59). Failures are already counted by `score` as failed extractions."""
+
+    def extract(pdf_path: Path) -> Invoice:
+        try:
+            return llm.extract(pdf_path)
+        finally:
+            # No usage means no reply (HTTP error, no text layer): not billed.
+            if llm.last_usage is not None:
+                meter.calls += 1
+                meter.record(llm.last_usage)
+
+    return extract
+
+
 def main(
     argv: Sequence[str] | None = None,
     extractors: Mapping[str, Extract] | None = None,
@@ -47,16 +132,20 @@ def main(
     # so mypy checks everything after this point.
     command: str = arguments.command
     extractor_name: str = arguments.extractor
+    # Filled by the real billed extractors; stays at zero for injected fakes.
+    meter = CallMeter()
     try:
         extract = (
             extractors[extractor_name]
             if extractors is not None
-            else build_extractor(extractor_name)
+            else build_extractor(extractor_name, meter)
         )
         if command == "extract":
             run_extract(Path(arguments.pdf), extract)
         else:
-            run_score(SAMPLES_DIRECTORY / str(arguments.set), extract)
+            run_score(
+                SAMPLES_DIRECTORY / str(arguments.set), extract, extractor_name, meter
+            )
     except (CliError, *EXTRACTION_FAILURES) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
@@ -89,7 +178,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_extractor(name: str) -> Extract:
+def build_extractor(name: str, meter: CallMeter) -> Extract:
     """The real extractor for `name`. Checks its key before any PDF is read."""
     key_name = REQUIRED_KEYS.get(name)
     if key_name is not None and not os.environ.get(key_name):
@@ -97,10 +186,10 @@ def build_extractor(name: str) -> Extract:
             f"{key_name} is not set. Locally: uv run --env-file .env document-extractor ..."
         )
     if name == "llm":
-        return LlmExtractor().extract
+        return metered_llm(LlmExtractor(), meter)
     if name == "rules-jev":
-        jev = Jev()
-        return lambda pdf_path: extract_with_currency_resolver(pdf_path, jev.ask)
+        ask = metered_ask(Jev(), meter)
+        return lambda pdf_path: extract_with_currency_resolver(pdf_path, ask)
     return rules_extractor.extract
 
 
@@ -116,13 +205,19 @@ def run_extract(pdf_path: Path, extract: Extract) -> None:
         print(f"warning: {warning}", file=sys.stderr)
 
 
-def run_score(set_directory: Path, extract: Extract) -> None:
+def run_score(
+    set_directory: Path, extract: Extract, extractor_name: str, meter: CallMeter
+) -> None:
     pairs: list[tuple[Invoice, Invoice]] = []
     failed_extractions = 0
+    seconds_spent = 0.0
 
     for pdf_path in sorted(set_directory.glob("*.pdf")):
         label_path = pdf_path.with_name(pdf_path.stem + ".expected.json")
         expected = Invoice.model_validate_json(label_path.read_text(encoding="utf-8"))
+        # perf_counter, not time.time: it is meant for measuring durations and
+        # cannot jump if the system clock is adjusted mid-run.
+        started = time.perf_counter()
         try:
             predicted = extract(pdf_path)
         except EXTRACTION_FAILURES as error:
@@ -131,6 +226,8 @@ def run_score(set_directory: Path, extract: Extract) -> None:
             failed_extractions += 1
             print(f"{pdf_path.stem:30} FAILED: {error}")
             predicted = Invoice()
+        finally:
+            seconds_spent += time.perf_counter() - started
         pairs.append((predicted, expected))
         print_invoice_result(pdf_path.stem, predicted, expected)
 
@@ -142,6 +239,34 @@ def run_score(set_directory: Path, extract: Extract) -> None:
     print(format_counts("overall", dataset_score.overall))
     for field_name, counts in dataset_score.per_field.items():
         print(format_counts(field_name, counts))
+    # Time and spend are printed after the counts and are not part of any
+    # score: extractors are ranked on accuracy only (D29, Q59).
+    invoice_count = max(dataset_score.invoice_count, 1)  # no division by zero
+    print(
+        f"\n{'time':16}{seconds_spent / invoice_count:.2f} s per invoice, "
+        f"{seconds_spent:.2f} s total"
+    )
+    if extractor_name in REQUIRED_KEYS:  # only billed extractors have a meter
+        print(format_meter(extractor_name, meter))
+
+
+def format_meter(extractor_name: str, meter: CallMeter) -> str:
+    tokens = f"{meter.input_tokens} input + {meter.output_tokens} output tokens"
+    if extractor_name == "llm":
+        dollars = (
+            meter.input_tokens * INPUT_DOLLARS_PER_MILLION_TOKENS
+            + meter.output_tokens * OUTPUT_DOLLARS_PER_MILLION_TOKENS
+        ) / 1_000_000
+        line = (
+            f"{'llm':16}{meter.calls} replies, {tokens}, ${dollars:.6f} at "
+            f"{DEFAULT_MODEL} prices (cached input not discounted)"
+        )
+    else:
+        # Jev is not priced: only its input price is known (D25, D29).
+        line = f"{'jev':16}{meter.calls} calls, {meter.failed_calls} failed, {tokens}"
+    if meter.calls_without_token_counts:
+        line += f", {meter.calls_without_token_counts} without token counts"
+    return line
 
 
 def print_invoice_result(name: str, predicted: Invoice, expected: Invoice) -> None:
