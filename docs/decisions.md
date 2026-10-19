@@ -233,3 +233,7 @@ correct and none wrong.
   It scores as missing, not wrong.
 - Rejected: keeping one string and adding examples to the prompt. Examples invented for the prompt would not break D6, but they only steer the model away
   from the failure; three fields remove it, need no prompt text, and do not depend on which date formats the examples happen to cover.
+
+### Live run 2, 2026-10-19 (after Q47; `uv run python -m scripts.live_llm_check`, 9 billed calls, dev only)
+0 failed calls. 63 of 63 header fields correct, `issue_date` 9 of 9, including `09/03/2026`, which the rules extractor leaves `null` as ambiguous (D24).
+This is one run per invoice; live run 1 and the diagnosis showed the date answer can change between calls, so the held-out run is the real check.
