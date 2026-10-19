@@ -38,7 +38,7 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 - Known formats: `30.04.2026`, `12 February 2026`, slash dates with a 4-digit year. Anything else gives `null`: ISO `2026-04-30`, `April 30, 2026`,
   `30 Apr 2026` (short month names), `30-04-2026`, two-digit years, a month word that is not an English month name.
 - A date-shaped string that is not a real day (`31.02.2026`) also gives `null`.
-- Dev cost: 0 (every dev date is in a known format).
+- Dev cost: 0 (every dev date is in a known format). Held-out cost: 1 (`a_clean-zm-banner`, `18-Mar-2025`).
 
 ### N6. Ambiguous slash date (`parse_date`)
 - `09/03/2026`: both parts are 12 or under, so it is 9 March (most countries) or 3 September (US). Returns `null`.
@@ -71,7 +71,7 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 - Only these codes count when printed: EUR, USD, GBP, ZAR, CHF, CAD, AUD, NZD, JPY, SEK, NOK, DKK. Only these symbols: `€`, `£`, `R` before a digit.
   `INR`, `PLN`, `¥`, `₹`, `kr`, `Fr.`, `R$` and others give `null`.
 - Why: a known list means an unknown code is missing, never a made-up currency (D24).
-- Dev cost: 0.
+- Dev cost: 0. Held-out cost: 1 (`a_clean-zm-banner`, kwacha printed as `K 45,915.58`, label ZMW).
 
 ### N13. No vendor candidate (`find_vendor_name`)
 - `null` only if every segment on the page is a title (`INVOICE`, `TAX INVOICE`), logo initials (3 capitals or fewer) or empty.

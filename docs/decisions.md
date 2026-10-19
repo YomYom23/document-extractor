@@ -262,3 +262,16 @@ fix later. Any new path that can produce a `null` (including the CLI's handling 
 - Added while building (not grilled): a `[build-system]` using `uv_build` with `module-root = ""`. Without one uv never installs the project, so
   `[project.scripts]` is skipped and the command does not exist. Side effect: `document_extractor` is now importable from anywhere in the venv.
   Also added: `extract` on a path that is not a file prints an error and exits 1 instead of a pdfplumber traceback.
+
+### Held-out run, 2026-10-19 (first run of any extractor on held-out; 4 billed OpenAI calls, 0 Jev calls)
+`uv run --env-file .env document-extractor score --extractor <name> --set heldout`, 4 invoices, 28 header fields, 0 failed extractions.
+
+| extractor | correct | missing | wrong |
+| --- | --- | --- | --- |
+| rules | 26 | 2 | 0 |
+| rules-jev | 26 | 2 | 0 |
+| llm | 28 | 0 | 0 |
+
+Both rules misses are `a_clean-zm-banner` (Zambia): `Date: 18-Mar-2025` is a format `parse_date` does not know (null-sources N5), and the
+currency is printed only as `K` (kwacha, label ZMW), which `detect_currency` does not know (N12). Jev was not called: the page has no `$`
+amount (N14), so rules-jev equals rules here. The score report does not show whether Jev was called or failed; that was checked by hand.
