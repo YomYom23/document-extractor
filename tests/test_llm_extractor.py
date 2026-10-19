@@ -19,7 +19,9 @@ def test_money_strings_become_exact_decimals() -> None:
     llm_invoice = LlmInvoice(
         vendor_name="Acme Industrial Supply Co",
         invoice_number="ACM-100145",
-        issue_date=date(2024, 3, 12),
+        issue_year=2024,
+        issue_month=3,
+        issue_day=12,
         currency="USD",
         subtotal="346.50",
         tax="25.99",
@@ -33,16 +35,49 @@ def test_money_strings_become_exact_decimals() -> None:
     assert invoice.line_items is None  # header fields only (D26)
 
 
-def test_nulls_stay_null() -> None:
-    llm_invoice = LlmInvoice(
+def invoice_dated(year: int | None, month: int | None, day: int | None) -> LlmInvoice:
+    """An answer where only the three date numbers matter."""
+    return LlmInvoice(
         vendor_name=None,
         invoice_number=None,
-        issue_date=None,
+        issue_year=year,
+        issue_month=month,
+        issue_day=day,
         currency=None,
         subtotal=None,
         tax=None,
         total=None,
     )
+
+
+def test_the_three_date_numbers_become_one_date() -> None:
+    assert to_invoice(invoice_dated(2026, 4, 30)).issue_date == date(2026, 4, 30)
+
+
+@pytest.mark.parametrize(
+    ("year", "month", "day"),
+    [(None, 4, 30), (2026, None, 30), (2026, 4, None)],
+)
+def test_a_partial_date_is_null_not_completed(
+    year: int | None, month: int | None, day: int | None
+) -> None:
+    # D11 and the Q47 amendment: never fill in a missing part by guessing.
+    assert to_invoice(invoice_dated(year, month, day)).issue_date is None
+
+
+@pytest.mark.parametrize(
+    ("year", "month", "day"),
+    [(2026, 30, 4), (2026, 2, 30), (2026, 0, 1), (2026, 4, 0)],
+)
+def test_an_impossible_date_is_null_not_an_error(
+    year: int, month: int, day: int
+) -> None:
+    # The other fields are still good, so the date scores as missing (Q47).
+    assert to_invoice(invoice_dated(year, month, day)).issue_date is None
+
+
+def test_nulls_stay_null() -> None:
+    llm_invoice = invoice_dated(None, None, None)
     assert to_invoice(llm_invoice).model_dump() == {
         "vendor_name": None,
         "invoice_number": None,
@@ -63,7 +98,9 @@ def test_money_must_be_plain_two_decimal_text(printed: str) -> None:
         LlmInvoice(
             vendor_name=None,
             invoice_number=None,
-            issue_date=None,
+            issue_year=None,
+            issue_month=None,
+            issue_day=None,
             currency=None,
             subtotal=None,
             tax=None,
@@ -75,7 +112,8 @@ def test_money_must_be_plain_two_decimal_text(printed: str) -> None:
 
 ACME_JSON = (
     '{"vendor_name": "Acme Industrial Supply Co", "invoice_number": "ACM-100145",'
-    ' "issue_date": "2024-03-12", "currency": "USD", "subtotal": "346.50",'
+    ' "issue_year": 2024, "issue_month": 3, "issue_day": 12,'
+    ' "currency": "USD", "subtotal": "346.50",'
     ' "tax": "25.99", "total": "372.49"}'
 )
 
@@ -137,6 +175,7 @@ def test_sends_the_page_and_settings_and_parses_the_answer() -> None:
 
     assert invoice.total == Decimal("372.49")
     assert invoice.currency == "USD"
+    assert invoice.issue_date == date(2024, 3, 12)
     request_body = json.loads(sent[0].content)
     assert request_body["model"] == "gpt-6-luna"
     assert request_body["input"] == "Acme Industrial Supply Co ... TOTAL $372.49"
@@ -148,6 +187,12 @@ def test_sends_the_page_and_settings_and_parses_the_answer() -> None:
     assert sent_format["strict"] is True
     total_schema = sent_format["schema"]["properties"]["total"]["anyOf"][0]
     assert total_schema["pattern"] == r"^-?\d+\.\d{2}$"
+    # One "YYYY-MM-DD" string made the model copy the page's leading digits
+    # into the year (D26 diagnosis); the date goes out as three integers.
+    properties = sent_format["schema"]["properties"]
+    assert "issue_date" not in properties
+    for part in ("issue_year", "issue_month", "issue_day"):
+        assert properties[part]["anyOf"][0]["type"] == "integer"
 
 
 def test_a_refusal_is_a_failure_not_an_empty_invoice() -> None:

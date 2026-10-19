@@ -217,3 +217,19 @@ returns `response.output_parsed`; strict structured outputs need every field `re
 `12 February 2026` gave 1202-12-12. The same failure on every layout and format points at how the date is requested, not at reading. Leading hypothesis,
 unverified: the strict `format: date` constraint. Open: diagnose before changing anything (see the handoff plan); the rules extractor had 7 of 9 dates
 correct and none wrong.
+
+### Diagnosis, 2026-10-19 (10 billed calls, all on `a_clean-de-grid-eu-decimals.pdf`, which prints `Date: 30.04.2026`; scratch scripts, not in the repo)
+- The model's raw JSON text already holds the bad year (`"issue_date":"3034-04-30"`); parsing passes it through. Not a parsing bug.
+- 3 calls per variant: `issue_date` as a string with pattern `^\d{4}-\d{2}-\d{2}$` instead of `format: date` gave `3004-30-30`, `3004-30-04`,
+  `3004-06-30`; the original schema without the "read numeric dates in the format of the seller's country" sentence gave `3004-04-30` twice and
+  `3046-04-30`; three integer fields gave 2026 / 4 / 30 on all 3.
+- Cause: asking for one `YYYY-MM-DD` string at all. The year is written first and the model fills it by copying the page's leading digits. `format: date`
+  and the prompt wording are not the cause. The bad year changes between calls, so one call per variant would not have shown this.
+
+### Amendment (grilling Q47): the date is asked for as three numbers
+- `LlmInvoice` replaces `issue_date` with `issue_year`, `issue_month`, `issue_day`, each `int | None`. `to_invoice` builds the `date`.
+- If any of the three is null, `issue_date` is null: a partial date is never completed by guessing (D11).
+- If the three do not form a real date (month 30, 30 February), `issue_date` is null rather than an error, because the other six fields are still good.
+  It scores as missing, not wrong.
+- Rejected: keeping one string and adding examples to the prompt. Examples invented for the prompt would not break D6, but they only steer the model away
+  from the failure; three fields remove it, need no prompt text, and do not depend on which date formats the examples happen to cover.

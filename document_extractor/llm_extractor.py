@@ -57,7 +57,14 @@ class LlmInvoice(BaseModel):
 
     vendor_name: str | None = Field(description="The seller's name as printed")
     invoice_number: str | None = Field(description="Exactly as printed")
-    issue_date: date | None = Field(description="The invoice date, not the due date")
+    # Three numbers, not one "YYYY-MM-DD" string: asked for one string, the
+    # model wrote the year first and filled it by copying the page's leading
+    # digits (30.04.2026 -> 3004-04-30). Split, it read all three right (D26).
+    issue_year: int | None = Field(
+        description="Year of the invoice date, not the due date"
+    )
+    issue_month: int | None = Field(description="Month of the invoice date, 1 to 12")
+    issue_day: int | None = Field(description="Day of the invoice date, 1 to 31")
     currency: CurrencyCode | None = Field(description="ISO 4217 code, e.g. EUR")
     subtotal: MoneyText | None
     tax: MoneyText | None
@@ -74,13 +81,30 @@ def to_invoice(llm_invoice: LlmInvoice) -> Invoice:
     return Invoice(
         vendor_name=llm_invoice.vendor_name,
         invoice_number=llm_invoice.invoice_number,
-        issue_date=llm_invoice.issue_date,
+        issue_date=issue_date_from_parts(
+            llm_invoice.issue_year, llm_invoice.issue_month, llm_invoice.issue_day
+        ),
         currency=llm_invoice.currency,
         subtotal=money(llm_invoice.subtotal),
         tax=money(llm_invoice.tax),
         total=money(llm_invoice.total),
         line_items=None,  # header fields only (D26)
     )
+
+
+def issue_date_from_parts(
+    year: int | None, month: int | None, day: int | None
+) -> date | None:
+    """Join the model's three date numbers into a date, or None (D26, Q47)."""
+    if year is None or month is None or day is None:
+        # A missing part is never filled in by guessing (D11).
+        return None
+    try:
+        return date(year, month, day)
+    except ValueError:
+        # Month 30 or 30 February: the date is unusable, but the other fields
+        # are still good, so it counts as missing instead of failing the call.
+        return None
 
 
 class LlmExtractionError(Exception):
