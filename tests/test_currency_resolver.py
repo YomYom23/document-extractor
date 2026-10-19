@@ -8,6 +8,7 @@ from typesafe_sdk import Choice, ChoiceAnswer
 from document_extractor.currency_resolver import (
     CURRENCY_QUESTION,
     DOLLAR_AMOUNT,
+    extract_with_currency_resolver,
     resolve_currency,
 )
 from document_extractor.jev import JevError
@@ -99,3 +100,19 @@ def test_snippet_answers_are_codes_jev_can_return() -> None:
     for snippet in snippets:
         assert snippet["expected"] is None or snippet["expected"] in offered_codes
         assert DOLLAR_AMOUNT.search(snippet["text"])  # else the stage skips it
+
+
+US_DEV_PDF = (
+    Path(__file__).parent.parent / "samples" / "dev" / "a_clean-us-clean-simple.pdf"
+)
+
+
+def test_rules_plus_jev_fills_the_currency_the_rules_left_null() -> None:
+    # The real rules extractor on a real bare-"$" invoice (D24 leaves it null),
+    # then the resolver with a fake Jev: the "rules-jev" row of the comparison.
+    jev = FakeJev("USD", confidence=0.95)
+    invoice = extract_with_currency_resolver(US_DEV_PDF, jev.ask)
+    assert invoice.currency == "USD"
+    assert invoice.total is not None  # the rules extractor's fields are kept
+    state, _questions = jev.calls[0]
+    assert "$" in state  # Jev got the PDF's page text, not an empty string

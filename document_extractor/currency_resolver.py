@@ -7,10 +7,13 @@ rules plus this stage as separate rows.
 
 import re
 from collections.abc import Callable, Mapping
+from pathlib import Path
 
 from typesafe_sdk import Choice, ChoiceAnswer
 
+from document_extractor import rules_extractor
 from document_extractor.jev import JevError
+from document_extractor.pdf_reader import read_pdf
 from document_extractor.schema import Invoice
 
 # The shape of `Jev.ask`. Taking a function instead of a Jev object lets tests
@@ -76,3 +79,12 @@ def currency_from_answer(answer: ChoiceAnswer, min_confidence: float) -> str | N
     if answer.choice == "unclear" or answer.confidence < min_confidence:
         return None  # wrong is worse than missing (D11)
     return answer.choice
+
+
+def extract_with_currency_resolver(pdf_path: Path, ask: AskJev) -> Invoice:
+    """The "rules + Jev" extractor: the comparison's middle row (D25, D28)."""
+    invoice = rules_extractor.extract(pdf_path)
+    # The rules extractor reads the PDF itself and does not hand back the
+    # text, so it is read a second time here; Jev needs the whole page (D25).
+    page_text = "\n".join(page.text for page in read_pdf(pdf_path).pages)
+    return resolve_currency(invoice, page_text, ask)

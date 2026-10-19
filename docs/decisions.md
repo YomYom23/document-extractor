@@ -241,3 +241,24 @@ This is one run per invoice; live run 1 and the diagnosis showed the date answer
 ## D27. Null-source register (`docs/null-sources.md`)
 Every code path that can leave a field `null` is listed there with its trigger, the reason, and its dev cost, so each cause can be studied for a
 fix later. Any new path that can produce a `null` (including the CLI's handling of errors) gets an entry in the same commit.
+
+## D28. CLI (`document_extractor/cli.py`, step 7; grilling Q48 to Q56)
+- Two subcommands: `extract <pdf>` prints one invoice as JSON (D7); `score` runs one extractor over a sample set and prints the counts (D21).
+- Run as `uv run document-extractor ...`, through a `[project.scripts]` entry point that calls `document_extractor.cli:main`.
+- Parser: `argparse` (stdlib). `click` and `typer` were the alternatives; for two subcommands they would add dependencies and save little.
+  `argparse` returns untyped (`Any`) values, so they are copied into typed variables right after parsing.
+- `--extractor rules|rules-jev|llm`, default `rules`, the only free one with no key or network. The names are the comparison's three rows (D25).
+- "rules + Jev" is `extract_with_currency_resolver(pdf_path, ask)` in `currency_resolver.py`, not CLI code, so it can be tested alone. It reads
+  the PDF twice (rules extractor, then page text for Jev); that costs milliseconds.
+- `extract`: stdout carries only the invoice JSON. The D22 arithmetic warning and errors go to stderr. No text layer or a failed LLM call prints an
+  error, no JSON, and exits 1: a failure is never shown as an all-null invoice. A Jev failure is not an error: the currency stays `null` (D25).
+- `score --extractor X --set dev|heldout`, default `dev`; held-out runs only when named (D6). A failed extraction is scored as an all-null invoice
+  (seven missing fields, except where the label is null too) and the number of failures is printed separately (D26). Its report replaces `scripts/live_llm_check.py`, which is deleted;
+  `scripts/live_currency_check.py` stays because it runs the `$` snippets, not invoices.
+- Keys come from the environment only; locally `uv run --env-file .env document-extractor ...` (uv 0.12.13 has `--env-file`). A missing key for
+  `llm` or `rules-jev` prints an error and exits 1 before any PDF is read.
+- Test seam: `main(argv, extractors=None) -> int`. Tests pass the arguments as a list, read output with `capsys`, run the real rules extractor on dev,
+  and pass fakes for `llm` and `rules-jev`, so no test uses the network.
+- Added while building (not grilled): a `[build-system]` using `uv_build` with `module-root = ""`. Without one uv never installs the project, so
+  `[project.scripts]` is skipped and the command does not exist. Side effect: `document_extractor` is now importable from anywhere in the venv.
+  Also added: `extract` on a path that is not a file prints an error and exits 1 instead of a pdfplumber traceback.

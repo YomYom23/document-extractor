@@ -11,14 +11,15 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 ## Whole invoice
 
 ### N1. LLM call fails (`llm_extractor.py`, `LlmExtractor.extract_from_text`)
-- Fields: all seven. Raises `LlmExtractionError`; `scripts/live_llm_check.py` then scores an empty `Invoice()`.
+- Fields: all seven. Raises `LlmExtractionError`. `document-extractor score` scores it as an empty `Invoice()` and counts it under "failed
+  extractions"; `document-extractor extract` prints an error and exits 1 instead of printing nulls (D28).
 - Triggers: any OpenAI `APIError` (timeout, connection, 4xx, 5xx), a reply cut off at `max_output_tokens`, a refusal, a reply that fails `LlmInvoice` validation.
 - Why null: a failed call has no answer to use, and filling in values would be a guess (D26).
 - Dev cost: 0 failed calls in live runs 1 and 2.
 
 ### N2. No text layer (`pdf_reader.py`, `read_pdf`)
-- Fields: none directly. Raises `NoTextLayerError` instead, so a scan is reported as a scan, not as seven missing fields (D23).
-- Listed because whoever catches it (the CLI, step 7) decides whether it becomes an all-null invoice or an error.
+- Fields: none in `extract`, which prints an error and exits 1. All seven in `score`, which scores the invoice as an empty `Invoice()` and counts
+  it under "failed extractions" (D28). The error exists so a scan is reported as a scan, not as seven silent missing fields (D23).
 
 ## Line items
 
