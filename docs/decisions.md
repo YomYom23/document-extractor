@@ -292,3 +292,7 @@ amount (N14), so rules-jev equals rules here. The score report does not show whe
 - Extractors are frozen at the commit the runs use (Q62). The held-out set has now been seen, so fixing anything it exposed (N5 `18-Mar-2025`,
   N12 `K`) would tune the rules to it; such fixes are later work, measured on new held-out samples.
 - The write-up ends with a verdict, backed by the numbers, on whether a hybrid extractor is justified (D5, Q63). Building one is a separate decision.
+
+### Result, 2026-10-19 (commit `b488ce4`; 39 billed OpenAI calls, 6 Jev calls, $0.0051 for the LLM)
+Written up in `docs/comparison.md`. All 13 invoices, 91 fields: llm 91 / 0 / 0 in all 3 runs; rules-jev 84 / 7 / 0 in all 3; rules 82 / 9 / 0.
+No extractor gave a wrong value. Verdict: the LLM ranks first, and a hybrid is not justified, because it could at best match the LLM's 91 of 91.
