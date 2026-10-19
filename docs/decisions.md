@@ -319,3 +319,9 @@ No extractor gave a wrong value. Verdict: the LLM ranks first, and a hybrid is n
 - `score` prints a subtotal per source prefix (`a_` ieb, `b_` invoicebench, `c_` sinabis, `r_` real) under the overall line (Q76).
 - Tests: `test_rules_extractor_on_dev_samples` is pinned to the 9 invoices the rules were written from (D24); the frozen rules' results on the new
   dev invoices are measured by `score`, not asserted. CLI score tests run on a temporary sample tree, so they do not change when samples are added.
+
+### Result, 2026-10-19 (commit `6d36091`; 67 billed OpenAI calls, $0.0100; 29 Jev calls; labels of the 9 real invoices confirmed by you)
+Written up in `docs/comparison.md` ("Wider set"). 469 fields, correct / missing / wrong: llm 462 / 0 / 7, rules 295 / 151 / 23, rules-jev
+322 / 123 / 24. On the 63 real-invoice fields: llm 59 / 0 / 4, rules 27 / 28 / 8, rules-jev 36 / 19 / 8. The LLM's 7 wrong values: 4 Stripe invoice
+numbers copied with the text layer's `\x00`, 1 vendor name garbled in the text layer, 2 vendor names where the page prints a short brand and the
+legal name (an open label-convention question). Jev's first wrong answer: MXN for a Mexican seller billing a US customer in `$` (label USD).

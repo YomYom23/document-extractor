@@ -6,7 +6,11 @@ The extractors were frozen for these runs (D29, Q62).
 
 ## Verdict
 
-**The LLM extractor is the most accurate: 91 of 91 header fields correct, in all three runs, with no wrong values.**
+**Update, wider set (D30):** on 67 invoices including 9 real ones, the LLM still ranks first, but it is no longer error-free: 7 wrong values in
+469 fields. All 7 trace to defects in the PDF's text layer or to which printed vendor name counts (see "Wider set" below). Rules alone now rank
+above rules + Jev by one wrong value: Jev gave its first wrong currency.
+
+**Original 13-invoice comparison, below this section's update:** the LLM extractor is the most accurate: 91 of 91 header fields correct, in all three runs, with no wrong values.
 Rules + Jev comes second (84 correct, 7 missing) and rules alone third (82 correct, 9 missing). Neither rules row ever produced a wrong value.
 
 **A hybrid is not justified by these numbers (D5).** A hybrid that runs the rules first and asks the LLM only for the fields they leave null
@@ -101,3 +105,57 @@ to call. Its answers did not.
   held-out samples to be measured fairly (Q62).
 - **Three runs.** Enough to see that the LLM's answers were stable here, not to estimate how often it is wrong.
 - **Header fields only.** Line items were not extracted or scored (D12).
+
+## Wider set (D30), 2026-10-19
+
+Commit `6d36091`, one run per extractor, `score --set dev` and `--set heldout`. 67 invoices, 469 header fields: 13 original, 25 more IEB, 20 Sinabis
+(a second layout engine) and 9 real invoices received by the project owner (Stripe-hosted, IONOS, Lucid; git-ignored, so only these totals are
+published). 67 billed LLM calls ($0.0100, $0.00015 per invoice), 29 Jev calls, 0 failed calls.
+
+| Rank | Extractor | Correct | Missing | Wrong | Real invoices only (63 fields) |
+| --- | --- | --- | --- | --- | --- |
+| 1 | llm | 462 | 0 | 7 | 59 / 0 / 4 |
+| 2 | rules | 295 | 151 | 23 | 27 / 28 / 8 |
+| 3 | rules-jev | 322 | 123 | 24 | 36 / 19 / 8 |
+
+Ranked on wrong values first (D11, D29): rules + Jev fills 28 more fields than rules alone, 27 of them correctly; the one wrong value ranks it last.
+
+By set (correct / missing / wrong):
+
+| Extractor | Dev (38 invoices, 266 fields) | Held-out (29 invoices, 203 fields) |
+| --- | --- | --- |
+| llm | 265 / 0 / 1 | 197 / 0 / 6 |
+| rules-jev | 197 / 61 / 8 | 125 / 62 / 16 |
+| rules | 185 / 74 / 7 | 110 / 77 / 16 |
+
+### Every LLM wrong value
+
+| Invoice | Field | Got | Label | Cause |
+| --- | --- | --- | --- | --- |
+| 4 Stripe invoices (real) | invoice_number | `C7F92D63\x000001` | `C7F92D63-0001` | Text layer holds `\x00` where the page shows `-`; the model copied it |
+| a_currency-multi-line-nad | vendor_name | `…(Pty) LtTdAX` | `…(Pty) Ltd` | Text layer interleaves the name with the overlapping "TAX INVOICE" |
+| c_0026691 (Romania) | vendor_name | `Dunărea Montaj` | `Dunărea Montaj Electric S.R.L.` | Page prints a short brand at the top and the legal name lower down |
+| c_0119854 (India) | vendor_name | `MM Painters` | `Mumbai Master Painters Pvt Ltd` | Same |
+
+The two remaining Stripe invoices read correctly. No wrong date, currency or amount from the LLM.
+
+### What the rules got wrong on unseen layouts
+
+- **Vendor name (19 wrong):** the first segment that is not a title is often a phone number, an address, a logo abbreviation (`VDMElect`,
+  `Toscana Assic.`) or, on every Stripe invoice, the `Invoice number …` line, because that label has no colon (D24).
+- **Amounts (4 wrong):** a tax rate read as the tax (`Tax (7.25%)` gave 7.25); `Total excl. tax` and `Total excluding tax` read as the total;
+  `Tax - Arizona 8.7% on $20.00 $1.74` read as 20.00. Each is a label starting a segment, followed by a number that is not the amount.
+- **Missing:** mostly labels without colons (`Invoice number`, `Date of issue`), date formats the parser does not know, and currency symbols
+  it does not know (null-sources N4, N5, N12).
+
+### Jev's first wrong answer
+
+`c_0108653` is a Mexican seller (Monterrey address, `+52` phone) billing a US customer in `$`; the label, from the dataset's manifest, is USD.
+Jev answered MXN with confidence at or above the 0.8 threshold. It is the same seller-country-versus-customer-country judgement as D25's two
+low-confidence cases, but this time the confidence was high. Across the wider set Jev was asked 29 times: 27 currencies filled correctly, 1 wrong,
+1 left null.
+
+### Open label question
+
+Two of the LLM's wrong values are a convention gap, not a misreading: the page prints both a short brand and the legal name, and D19 only says
+"the seller's name as printed". How it is settled changes the LLM's wrong count from 7 to 5.
