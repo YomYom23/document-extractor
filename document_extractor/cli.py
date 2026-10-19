@@ -42,6 +42,21 @@ EXTRACTOR_NAMES = ("rules", "rules-jev", "llm")  # the comparison's rows (D25)
 # The key each billed extractor's SDK reads from the environment (Q55).
 REQUIRED_KEYS = {"rules-jev": "TYPESAFE_API_KEY", "llm": "OPENAI_API_KEY"}
 SAMPLES_DIRECTORY = Path(__file__).parent.parent / "samples"
+# The file-name prefix says where a sample came from (samples/ATTRIBUTION.md,
+# D30). `score` prints a subtotal per source so "how does it do on real
+# invoices" is not hidden inside the overall count (Q76).
+SOURCE_NAMES = {"a": "ieb", "b": "invoicebench", "c": "sinabis", "r": "real"}
+
+
+def set_directories(sample_set: str) -> list[Path]:
+    """Public samples plus the git-ignored private ones of the same set (Q75)."""
+    return [SAMPLES_DIRECTORY / sample_set, SAMPLES_DIRECTORY / "private" / sample_set]
+
+
+def source_of(pdf_path: Path) -> str:
+    prefix = pdf_path.name.split("_", 1)[0]
+    return SOURCE_NAMES.get(prefix, "other")
+
 
 # The failures that mean "this invoice could not be extracted". Anything else
 # is a bug and should crash loudly with a traceback, not be counted.
@@ -144,7 +159,7 @@ def main(
             run_extract(Path(arguments.pdf), extract)
         else:
             run_score(
-                SAMPLES_DIRECTORY / str(arguments.set), extract, extractor_name, meter
+                set_directories(str(arguments.set)), extract, extractor_name, meter
             )
     except (CliError, *EXTRACTION_FAILURES) as error:
         print(f"error: {error}", file=sys.stderr)
@@ -206,13 +221,20 @@ def run_extract(pdf_path: Path, extract: Extract) -> None:
 
 
 def run_score(
-    set_directory: Path, extract: Extract, extractor_name: str, meter: CallMeter
+    directories: list[Path], extract: Extract, extractor_name: str, meter: CallMeter
 ) -> None:
     pairs: list[tuple[Invoice, Invoice]] = []
+    pairs_by_source: dict[str, list[tuple[Invoice, Invoice]]] = {}
     failed_extractions = 0
     seconds_spent = 0.0
 
-    for pdf_path in sorted(set_directory.glob("*.pdf")):
+    # Sorted by file name across both folders, so private invoices sit among
+    # the public ones by source prefix instead of in a block at the end.
+    pdf_paths = sorted(
+        (path for directory in directories for path in directory.glob("*.pdf")),
+        key=lambda path: path.name,
+    )
+    for pdf_path in pdf_paths:
         label_path = pdf_path.with_name(pdf_path.stem + ".expected.json")
         expected = Invoice.model_validate_json(label_path.read_text(encoding="utf-8"))
         # perf_counter, not time.time: it is meant for measuring durations and
@@ -229,6 +251,9 @@ def run_score(
         finally:
             seconds_spent += time.perf_counter() - started
         pairs.append((predicted, expected))
+        pairs_by_source.setdefault(source_of(pdf_path), []).append(
+            (predicted, expected)
+        )
         print_invoice_result(pdf_path.stem, predicted, expected)
 
     dataset_score = score_dataset(pairs)
@@ -237,6 +262,9 @@ def run_score(
         f"{failed_extractions} failed extractions"
     )
     print(format_counts("overall", dataset_score.overall))
+    for source in sorted(pairs_by_source):
+        source_score = score_dataset(pairs_by_source[source])
+        print(format_counts(f"  {source}", source_score.overall))
     for field_name, counts in dataset_score.per_field.items():
         print(format_counts(field_name, counts))
     # Time and spend are printed after the counts and are not part of any

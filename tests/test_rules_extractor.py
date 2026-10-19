@@ -52,6 +52,21 @@ def test_parse_date(printed: str, expected: date | None) -> None:
 
 DEV_DIRECTORY = Path(__file__).parent.parent / "samples" / "dev"
 
+# The 9 dev invoices the rules were written and checked against (D24, D25).
+# Dev has grown since (D30) with invoices the frozen rules have never seen
+# (D29, Q62); their results are measured by `score`, not pinned here.
+RULES_DEV_SAMPLES = (
+    "a_clean-de-grid-eu-decimals",
+    "a_clean-fr-right-header",
+    "a_clean-nl-two-column",
+    "a_clean-us-clean-simple",
+    "a_clean-za-code-zebra",
+    "a_currency-nad-bare-dollar",
+    "b_INV-2026-0068",
+    "b_INV-2026-0129",
+    "b_INV-2026-0194",
+)
+
 # Fields the rules are expected to miss on each dev sample (D24). Pinned, so a
 # rule change that finds or loses a field shows up here. Unlisted: none missed.
 EXPECTED_MISSING = {
@@ -65,7 +80,9 @@ EXPECTED_MISSING = {
 
 
 @pytest.mark.parametrize(
-    "pdf_path", sorted(DEV_DIRECTORY.glob("*.pdf")), ids=lambda path: path.stem
+    "pdf_path",
+    [DEV_DIRECTORY / f"{name}.pdf" for name in RULES_DEV_SAMPLES],
+    ids=lambda path: path.stem,
 )
 def test_rules_extractor_on_dev_samples(pdf_path: Path) -> None:
     label_path = pdf_path.with_name(pdf_path.stem + ".expected.json")

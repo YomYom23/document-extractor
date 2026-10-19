@@ -1,0 +1,10 @@
+{
+  "vendor_name": "Acme Industrial Supply Co",
+  "invoice_number": "ACM-100355",
+  "issue_date": "2024-04-08",
+  "currency": "USD",
+  "subtotal": "1268.00",
+  "tax": "90.35",
+  "total": "1294.95",
+  "line_items": null
+}

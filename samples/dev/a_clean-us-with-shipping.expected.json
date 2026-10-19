@@ -1,0 +1,10 @@
+{
+  "vendor_name": "Northwind Logistics LLC",
+  "invoice_number": "NWL-20240318-002",
+  "issue_date": "2024-03-18",
+  "currency": "USD",
+  "subtotal": "1422.00",
+  "tax": "92.43",
+  "total": "1599.43",
+  "line_items": null
+}

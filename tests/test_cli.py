@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from typesafe_sdk import Choice, ChoiceAnswer
 
+from document_extractor import cli
 from document_extractor.cli import (
     CallMeter,
     format_meter,
@@ -124,21 +125,43 @@ def test_a_missing_key_stops_before_any_pdf_is_read(
 # --- score ------------------------------------------------------------------
 
 
-def test_score_reports_the_rules_extractor_on_dev(
-    capsys: pytest.CaptureFixture[str],
+@pytest.fixture
+def sample_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A small samples/ folder, so score tests do not change whenever the real
+    sample set grows (D30). Two public dev invoices and one "private" one."""
+    for name, target in [
+        ("a_clean-de-grid-eu-decimals", tmp_path / "dev"),
+        ("b_INV-2026-0129", tmp_path / "dev"),
+        # A public sample renamed: a test cannot rely on the git-ignored
+        # real invoices, which a fresh clone does not have (Q75).
+        ("a_clean-de-grid-eu-decimals", tmp_path / "private" / "dev"),
+    ]:
+        target.mkdir(parents=True, exist_ok=True)
+        new_name = "r_test" if "private" in target.parts else name
+        for suffix in (".pdf", ".expected.json"):
+            (target / f"{new_name}{suffix}").write_bytes(
+                (DEV_DIRECTORY / f"{name}{suffix}").read_bytes()
+            )
+    (tmp_path / "heldout").mkdir()
+    monkeypatch.setattr(cli, "SAMPLES_DIRECTORY", tmp_path)
+    return tmp_path
+
+
+def test_score_reports_the_rules_extractor(
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     exit_code = main(["score"])  # defaults: rules on dev (Q51, Q54)
 
     printed = capsys.readouterr()
     assert exit_code == 0
-    # The free rules run of 2026-10-19 (docs/null-sources.md).
-    assert "9 invoices, 0 failed extractions" in printed.out
-    assert "overall         correct 56  missing 7  wrong 0" in printed.out
+    # de: 7 correct. 0129: subtotal, total and currency missing (D24).
+    assert "3 invoices, 0 failed extractions" in printed.out
+    assert "overall         correct 18  missing 3  wrong 0" in printed.out
     assert "b_INV-2026-0129" in printed.out
 
 
-def test_score_uses_dev_unless_held_out_is_named(
-    capsys: pytest.CaptureFixture[str],
+def test_score_includes_the_private_folder_of_the_set(
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     seen: list[Path] = []
 
@@ -148,12 +171,29 @@ def test_score_uses_dev_unless_held_out_is_named(
 
     main(["score", "--extractor", "llm"], extractors=fake_llm(recording))
 
-    assert len(seen) == 9
-    assert {pdf_path.parent.name for pdf_path in seen} == {"dev"}
+    # dev and private/dev, never held-out unless named (D6, Q75).
+    assert sorted(pdf_path.stem for pdf_path in seen) == [
+        "a_clean-de-grid-eu-decimals",
+        "b_INV-2026-0129",
+        "r_test",
+    ]
+
+
+def test_score_prints_a_subtotal_per_source(
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["score"])
+
+    printed = capsys.readouterr().out
+    # One line per source prefix present (Q76): a_ IEB, b_ InvoiceBenchmark, r_ yours.
+    assert "  ieb           correct 7  missing 0  wrong 0" in printed
+    assert "  invoicebench  correct 4  missing 3  wrong 0" in printed
+    assert "  real          correct 7  missing 0  wrong 0" in printed
+    assert "sinabis" not in printed  # no c_ samples in this tree
 
 
 def test_a_failed_extraction_scores_as_missing_and_is_counted(
-    capsys: pytest.CaptureFixture[str],
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     exit_code = main(
         ["score", "--extractor", "llm"],
@@ -162,9 +202,9 @@ def test_a_failed_extraction_scores_as_missing_and_is_counted(
 
     printed = capsys.readouterr()
     assert exit_code == 0
-    assert "9 invoices, 9 failed extractions" in printed.out
-    # 62 missing, not 63: 0129's label has no tax, so a null tax is correct.
-    assert "overall         correct 1  missing 62  wrong 0" in printed.out
+    assert "3 invoices, 3 failed extractions" in printed.out
+    # 20 missing, not 21: 0129's label has no tax, so a null tax is correct.
+    assert "overall         correct 1  missing 20  wrong 0" in printed.out
 
 
 # --- call meters: time, tokens and Jev visibility (D29, Q59, Q60) -------------
@@ -257,7 +297,7 @@ def test_the_jev_line_shows_calls_failures_and_unreported_tokens() -> None:
 
 
 def test_score_reports_the_time_per_invoice(
-    capsys: pytest.CaptureFixture[str],
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     main(["score"])
     assert "s per invoice" in capsys.readouterr().out

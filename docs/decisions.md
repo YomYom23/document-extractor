@@ -296,3 +296,26 @@ amount (N14), so rules-jev equals rules here. The score report does not show whe
 ### Result, 2026-10-19 (commit `b488ce4`; 39 billed OpenAI calls, 6 Jev calls, $0.0051 for the LLM)
 Written up in `docs/comparison.md`. All 13 invoices, 91 fields: llm 91 / 0 / 0 in all 3 runs; rules-jev 84 / 7 / 0 in all 3; rules 82 / 9 / 0.
 No extractor gave a wrong value. Verdict: the LLM ranks first, and a hybrid is not justified, because it could at best match the LLM's 91 of 91.
+
+## D30. Wider sample set with real invoices (grilling Q64 to Q76)
+- Real invoices are your own received invoices, digital PDFs only (Q64). 10 were supplied; the credit note is out of scope (Q67), leaving 9 from three
+  templates: Stripe-hosted (6), IONOS (2), Lucid Software (1, two pages). No other source of real, openly licensed, digital invoices was found.
+- They and their labels live in git-ignored `samples/private/<set>/` (Q69, Q75) and are sent to OpenAI (`store=False`) and Jev when scored. Only
+  aggregate scores are written into the docs. `score --set X` reads `samples/X/` and `samples/private/X/`.
+- Labels hold the printed value (Q71). The Stripe text layer has `\x00` where the page shows a hyphen (`9B5AC24F-0001`), so an extractor that
+  copies the text layer scores wrong. Repairing it would be a later `pdf_reader` fix.
+- Synthetic additions (Q65, Q73): 25 more IEB v1 invoices (all 5 in-scope "hard", 4 multi-page of 2 to 8 pages, 4 each of clean, freight, currency,
+  tax; seeded pick, seed 42) and 20 Sinabis invoices (CC BY 4.0, a second layout engine; English, not scanned, text layer, one per issuer country,
+  seed 42), read out of the 9.9 GB zip with HTTP range requests. English only (Q66). Multi-page allowed; credit notes, scans and dual-currency
+  invoices stay out (Q67).
+- Split (Q74): synthetic 50/50 within each category (held-out gets the smaller half); your invoices by template, so held-out templates are unseen:
+  Stripe and Lucid in held-out, IONOS in dev. The 4 old held-out invoices moved to dev (Q68). Result: dev 36 public + 2 private, held-out 22 public
+  + 7 private.
+- New labels are header-only: `line_items` is `null` (not scored, D12; the multi-page IEB invoices have up to 117 lines). Drafted from the PDF text
+  and cross-checked (Q72): IEB against its answer keys (all 25 agree), Sinabis against its manifest (number, date, currency, total; all 20 agree),
+  your 9 by you. Conventions found while labelling: a vendor printed only as a trade name (`PATHWISE VISION`) is labelled as printed;
+  shipping, delivery, discount and withholding lines are not fields, so subtotal + tax can differ from total (D19, D20); a currency with no
+  decimals (JPY, HUF) is labelled as printed (`88106`).
+- `score` prints a subtotal per source prefix (`a_` ieb, `b_` invoicebench, `c_` sinabis, `r_` real) under the overall line (Q76).
+- Tests: `test_rules_extractor_on_dev_samples` is pinned to the 9 invoices the rules were written from (D24); the frozen rules' results on the new
+  dev invoices are measured by `score`, not asserted. CLI score tests run on a temporary sample tree, so they do not change when samples are added.
