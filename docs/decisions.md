@@ -210,3 +210,10 @@ returns `response.output_parsed`; strict structured outputs need every field `re
 - Tests: contract tests drive the real SDK with only the HTTP layer mocked (request body, parsed reply, refusal, incomplete reply, HTTP 500); unit tests
   for the `LlmInvoice` to `Invoice` conversion. The billed live run covers the 9 dev invoices only, on request, with `OPENAI_API_KEY` in `.env`.
   A monthly budget is set on the OpenAI project (D8).
+
+### Live run 1, 2026-10-17 (`uv run python -m scripts.live_llm_check`, 9 billed calls, dev only)
+0 failed calls. 54 of 54 non-date header fields correct, including what the rules missed (US currency, 0129's subtotal and total from sentences).
+`issue_date` was wrong on all 9, with years built from the printed day and month digits: `30.04.2026` gave 3004-04-30, `09/03/2026` gave 0909-03-03,
+`12 February 2026` gave 1202-12-12. The same failure on every layout and format points at how the date is requested, not at reading. Leading hypothesis,
+unverified: the strict `format: date` constraint. Open: diagnose before changing anything (see the handoff plan); the rules extractor had 7 of 9 dates
+correct and none wrong.
