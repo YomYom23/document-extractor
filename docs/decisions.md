@@ -393,3 +393,10 @@ cannot tell whether the new prompt or variation caused it. No wrong value anywhe
   (`-?\d+\.\d{2}`); `quantity` and `unit_price` as `-?\d+(\.\d{1,4})?`, so `0.125` and `1.5` are not rounded. The header block must stay at
   or near 468 / 1 / 0; any move is recorded.
 - Build order (Q94): labels, then scorer matching (test-first), then LLM schema and prompt, then a billed run.
+- Label conventions found while drafting (Q99 to Q103): an item code is left out of `description` whether it has its own column (as in
+  `a_clean-za-code-zebra` already) or is printed inside the description cell (Sinabis `SUB-STO-FENCE …`). The description is everything else
+  printed inside that row's description cell (lot numbers, service periods, wrapped tails), joined with single spaces, and nothing from outside
+  the cell; the page image decides cell boundaries where the text layer is unclear. When a row prints several amounts, `line_total` is the
+  amount before tax, the column that sums to the subtotal (Lucid: 36.00, not 39.14). With a per-row discount column, `unit_price` is the
+  printed rate and `line_total` the printed amount after discount, so quantity x unit price may differ from it (line-level D20). Units of
+  measure are dropped (`14.5 h` gives 14.5). Zero-amount item rows (IONOS `IP address … $0.00`) are lines.
