@@ -324,4 +324,11 @@ No extractor gave a wrong value. Verdict: the LLM ranks first, and a hybrid is n
 Written up in `docs/comparison.md` ("Wider set"). 469 fields, correct / missing / wrong: llm 462 / 0 / 7, rules 295 / 151 / 23, rules-jev
 322 / 123 / 24. On the 63 real-invoice fields: llm 59 / 0 / 4, rules 27 / 28 / 8, rules-jev 36 / 19 / 8. The LLM's 7 wrong values: 4 Stripe invoice
 numbers copied with the text layer's `\x00`, 1 vendor name garbled in the text layer, 2 vendor names where the page prints a short brand and the
-legal name (an open label-convention question). Jev's first wrong answer: MXN for a Mexican seller billing a US customer in `$` (label USD).
+legal name (settled in D31: the legal name is the label). Jev's first wrong answer: MXN for a Mexican seller billing a US customer in `$` (label USD).
+
+## D31. A vendor's legal name beats its brand (amends D19; grilling Q77)
+When the page prints both a short brand (`Dunărea Montaj`, `MM Painters`) and the full legal name (`Dunărea Montaj Electric S.R.L.`), the
+`vendor_name` label is the legal name. Only one answer per field is accepted: no "also accepted" list, no scorer change. Why: a legal name is what a
+supplier record or a tax registration would be matched against, and a brand is not; the existing labels already follow it. D30's "trade name printed
+alone is labelled as printed" still holds, since there is no legal name to prefer. Consequence: the LLM's 2 brand answers on the wider set stay wrong
+(7 wrong, not 5).

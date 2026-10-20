@@ -155,7 +155,7 @@ Jev answered MXN with confidence at or above the 0.8 threshold. It is the same s
 low-confidence cases, but this time the confidence was high. Across the wider set Jev was asked 29 times: 27 currencies filled correctly, 1 wrong,
 1 left null.
 
-### Open label question
+### Brand versus legal name (settled, D31)
 
-Two of the LLM's wrong values are a convention gap, not a misreading: the page prints both a short brand and the legal name, and D19 only says
-"the seller's name as printed". How it is settled changes the LLM's wrong count from 7 to 5.
+Two of the LLM's wrong values were a convention gap, not a misreading: the page prints both a short brand and the legal name, and D19 only said
+"the seller's name as printed". D31 settles it: the label is the legal name, so these 2 stay wrong and the LLM's count stays at 7.
