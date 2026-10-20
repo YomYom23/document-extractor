@@ -10,6 +10,9 @@ The extractors were frozen for these runs (D29, Q62).
 469 fields. All 7 trace to defects in the PDF's text layer or to which printed vendor name counts (see "Wider set" below). Rules alone now rank
 above rules + Jev by one wrong value: Jev gave its first wrong currency.
 
+**Update, NUL repair (D32):** with the reader's text-layer repair, the LLM re-run gives 466 / 0 / 3, and 63 / 0 / 0 on the real invoices. The 4
+Stripe invoice numbers are now right. The 3 left are one garbled text layer and two brand names (D31). Rules are unchanged (see the end of this file).
+
 **Original 13-invoice comparison, below this section's update:** the LLM extractor is the most accurate: 91 of 91 header fields correct, in all three runs, with no wrong values.
 Rules + Jev comes second (84 correct, 7 missing) and rules alone third (82 correct, 9 missing). Neither rules row ever produced a wrong value.
 
@@ -159,3 +162,20 @@ low-confidence cases, but this time the confidence was high. Across the wider se
 
 Two of the LLM's wrong values were a convention gap, not a misreading: the page prints both a short brand and the legal name, and D19 only said
 "the seller's name as printed". D31 settles it: the label is the legal name, so these 2 stay wrong and the LLM's count stays at 7.
+
+## After the NUL repair (D32), 2026-10-19
+
+Commit `51d2d9d`. The reader now replaces each `\x00` the text layer holds with the character pdfium reads at the same spot (D32). LLM re-run,
+one run, both sets: 67 billed calls, 66,953 input + 6,232 output tokens, $0.0098; 0 failed extractions.
+
+| Extractor | Correct | Missing | Wrong | Real invoices only (63 fields) | Dev | Held-out |
+| --- | --- | --- | --- | --- | --- | --- |
+| llm | 466 | 0 | 3 | 63 / 0 / 0 | 265 / 0 / 1 | 201 / 0 / 2 |
+| rules | 295 | 151 | 23 | unchanged | 185 / 74 / 7 | 110 / 77 / 16 |
+
+The LLM's 3 wrong values: `…(Pty) LtTdAX` (the text layer interleaves the name with "TAX INVOICE"), `Dunărea Montaj`, and `MM Painters Mumbai`
+(the brand; this run appended the city, the last run did not). Rules did not move, because they never found the Stripe invoice numbers.
+`rules-jev` was not re-run (Jev calls are billed); its figures above are from before the repair.
+
+Caveat: the Stripe invoices are in held-out, and the defect was found by reading their failures. The fix is justified by the file defect, not by
+the score, but held-out is no longer a clean measure of it (D32).

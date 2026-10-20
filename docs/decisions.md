@@ -351,6 +351,7 @@ alone is labelled as printed" still holds, since there is no legal name to prefe
   Where pdfium cannot name a glyph either, it returns U+FFFE (a Unicode non-character), not NUL; any non-printable answer is rejected and
   becomes U+FFFD. A NUL glyph with zero width (possible with a standard font and no `/Widths`) has no box to search, and becomes U+FFFD too.
 - Result: all 28 Stripe NULs repaired, each equal to pdfium's own text; none left on any sample. `rules` unchanged at 295 / 151 / 23 (it never
-  found the Stripe invoice numbers, so nothing moved). The LLM's score is re-measured only on a billed run.
+  found the Stripe invoice numbers, so nothing moved). LLM re-run (commit `51d2d9d`, 67 billed calls, $0.0098): 466 / 0 / 3, was 462 / 0 / 7;
+  real invoices 63 / 0 / 0. Written up in `docs/comparison.md` ("After the NUL repair").
 - Held-out caveat: the defect was found by reading held-out failures (the Stripe invoices are in held-out, D30). The fix is justified by the file
   defect, not by a score, but held-out is no longer clean for it.
