@@ -332,3 +332,25 @@ When the page prints both a short brand (`Dunărea Montaj`, `MM Painters`) and t
 supplier record or a tax registration would be matched against, and a brand is not; the existing labels already follow it. D30's "trade name printed
 alone is labelled as printed" still holds, since there is no legal name to prefer. Consequence: the LLM's 2 brand answers on the wider set stay wrong
 (7 wrong, not 5).
+
+## D32. Repair NUL characters in the text layer with pdfium (amends D14, D23; grilling Q78 to Q83)
+- Cause, found by reading the files: the 6 Stripe invoices' ToUnicode tables map 3 to 5 Inter glyphs to U+0000. The embedded fonts are subsets
+  with no glyph names and no character map, so pdfplumber can only copy the bad entry. 28 NUL sites: `-` (invoice numbers, phone, ZIP+4, EIN,
+  `-$40.00`), `(`, `)`, `+`, `–` (date ranges) and `:`. pdfium, already installed under pdfplumber, reads all 28 correctly; each matches the glyph's
+  measured width. No public sample draws a NUL.
+- Fix (Q79): `read_page` replaces each `\x00` character with the character pdfium finds at the same position, then builds `text` and `words` from
+  the repaired characters with pdfplumber's own `chars_to_textmap` and `extract_words`, the functions `Page.extract_text` and `Page.extract_words`
+  call. Pages without a NUL come out exactly as before. Switching the whole reader to pdfium was rejected: it would change all 67 samples' text.
+- `pypdfium2` is a declared dependency (Q80); `pdf_reader` stays the only module that imports a PDF library (D14).
+- Where pdfium also has no character, or also returns a NUL, the reader writes U+FFFD `�` (Q81): visible and standard, where `\x00` hides.
+- The repair runs on any NUL from any PDF, with no check on font or producer (Q82): the defect is generic.
+- Proof (Q83): public samples' text and words unchanged; the Stripe sample reads `9B5AC24F-0001`, `+1 888-493-2343` and `-$40.00` with no NUL
+  (skipped where the private folder is absent); a test of the U+FFFD fallback.
+- Found while building it: pdfium boxes only a glyph's ink, and a hyphen's ink sits above the centre of pdfplumber's full-height box, so the
+  position lookup searches half the character's height vertically and a quarter of its width horizontally (so a neighbour is never picked).
+  Where pdfium cannot name a glyph either, it returns U+FFFE (a Unicode non-character), not NUL; any non-printable answer is rejected and
+  becomes U+FFFD. A NUL glyph with zero width (possible with a standard font and no `/Widths`) has no box to search, and becomes U+FFFD too.
+- Result: all 28 Stripe NULs repaired, each equal to pdfium's own text; none left on any sample. `rules` unchanged at 295 / 151 / 23 (it never
+  found the Stripe invoice numbers, so nothing moved). The LLM's score is re-measured only on a billed run.
+- Held-out caveat: the defect was found by reading held-out failures (the Stripe invoices are in held-out, D30). The fix is justified by the file
+  defect, not by a score, but held-out is no longer clean for it.
