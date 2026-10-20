@@ -355,3 +355,14 @@ alone is labelled as printed" still holds, since there is no legal name to prefe
   real invoices 63 / 0 / 0. Written up in `docs/comparison.md` ("After the NUL repair").
 - Held-out caveat: the defect was found by reading held-out failures (the Stripe invoices are in held-out, D30). The fix is justified by the file
   defect, not by a score, but held-out is no longer clean for it.
+
+## D33. The LLM prompt states the legal-name rule (amends D26; grilling Q84 to Q87)
+- The LLM's last 2 brand-name errors (D31) came from the prompt, not the reading: its vendor line said only "the seller's name as printed", so
+  the model took the first name on the page. The line now says to give the registered name when the page prints both a brand and a fuller
+  company name, the name as printed otherwise (D30's trade-name convention), and never to add address parts (one answer had appended the city).
+- The example suffixes are generic (Ltd, Inc, GmbH). `S.R.L.` and `Pvt Ltd` come from the two failing invoices, one of them held-out, so naming
+  them would put held-out text into the prompt (D6).
+- No unit test (Q87): a test that the prompt contains the sentence only restates the code. Measured by a billed run of both sets (Q86).
+  Success: both brand cases correct and no new wrong value; the risk watched for is a payee, bank or parent company chosen instead.
+- Caveat: `c_0119854` is in held-out and its failure was read before this change, so held-out is not a clean measure of it.
+- The 3rd remaining LLM error (`…LtTdAX`, a text layer that interleaves overlapping text) is left as is (Q84).

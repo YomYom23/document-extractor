@@ -32,7 +32,11 @@ You extract header fields from the text of one invoice.
 Return null for any field the page does not show. Never guess, and never
 compute a value that is not printed.
 
-- vendor_name: the seller's name as printed (not the customer's).
+- vendor_name: the seller's name (not the customer's). If the page prints
+  both a short or brand name and a fuller registered company name (usually
+  ending in a legal suffix such as Ltd, Inc or GmbH), give the registered
+  name. Otherwise give the name as printed. Never add address parts such as
+  a city or postcode.
 - invoice_number: exactly as printed.
 - issue_date: the invoice date, not the due date. Read numeric dates in the
   format of the seller's country (day/month in most countries, month/day in
