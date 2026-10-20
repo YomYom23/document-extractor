@@ -366,3 +366,10 @@ alone is labelled as printed" still holds, since there is no legal name to prefe
   Success: both brand cases correct and no new wrong value; the risk watched for is a payee, bank or parent company chosen instead.
 - Caveat: `c_0119854` is in held-out and its failure was read before this change, so held-out is not a clean measure of it.
 - The 3rd remaining LLM error (`…LtTdAX`, a text layer that interleaves overlapping text) is left as is (Q84).
+
+### Result, 2026-10-19 (commit `0a8b3a2`; 67 billed OpenAI calls, 71,040 input + 5,961 output tokens, $0.0101)
+468 / 1 / 0 on 469 fields, was 466 / 0 / 3: dev 265 / 1 / 0, held-out 203 / 0 / 0; real invoices 63 / 0 / 0. Both brand cases now give the
+registered name. `…LtTdAX` also came back clean (`…(Pty) Ltd`), though the text layer is unchanged; one run cannot say whether the prompt or
+run-to-run variation did it. New: `c_0108653`'s currency came back null (was USD, correct). It is the Mexican seller billing a US customer in
+`$`, the same case Jev got wrong (D30); the currency instruction did not change, and null is what it asks for when the page is unclear. One run
+cannot tell whether the new prompt or variation caused it. No wrong value anywhere.

@@ -13,6 +13,9 @@ above rules + Jev by one wrong value: Jev gave its first wrong currency.
 **Update, NUL repair (D32):** with the reader's text-layer repair, the LLM re-run gives 466 / 0 / 3, and 63 / 0 / 0 on the real invoices. The 4
 Stripe invoice numbers are now right. The 3 left are one garbled text layer and two brand names (D31). Rules are unchanged (see the end of this file).
 
+**Update, legal-name prompt (D33):** with the vendor-name rule stated in the prompt, the LLM gives 468 correct, 1 missing, 0 wrong
+(see "After the legal-name prompt" at the end of this file).
+
 **Original 13-invoice comparison, below this section's update:** the LLM extractor is the most accurate: 91 of 91 header fields correct, in all three runs, with no wrong values.
 Rules + Jev comes second (84 correct, 7 missing) and rules alone third (82 correct, 9 missing). Neither rules row ever produced a wrong value.
 
@@ -179,3 +182,17 @@ The LLM's 3 wrong values: `…(Pty) LtTdAX` (the text layer interleaves the name
 
 Caveat: the Stripe invoices are in held-out, and the defect was found by reading their failures. The fix is justified by the file defect, not by
 the score, but held-out is no longer a clean measure of it (D32).
+
+## After the legal-name prompt (D33), 2026-10-19
+
+Commit `0a8b3a2`. The prompt's vendor line now asks for the registered name when the page prints both a brand and a fuller company name, and
+never for address parts (D33). LLM re-run, one run, both sets: 67 billed calls, 71,040 input + 5,961 output tokens, $0.0101; 0 failed extractions.
+
+| Extractor | Correct | Missing | Wrong | Real invoices only (63 fields) | Dev | Held-out |
+| --- | --- | --- | --- | --- | --- | --- |
+| llm | 468 | 1 | 0 | 63 / 0 / 0 | 265 / 1 / 0 | 203 / 0 / 0 |
+
+- Both brand cases are fixed: `Dunărea Montaj Electric S.R.L.` and `Mumbai Master Painters Pvt Ltd`.
+- `…(Pty) LtTdAX` came back as `…(Pty) Ltd`, though the text layer did not change; one run cannot say whether the prompt or variation did it.
+- New missing value: `c_0108653`'s currency is null (was USD, correct): a Mexican seller billing a US customer in `$`, the case Jev got wrong.
+  The currency instruction did not change, and null is what it asks for when the page is unclear. One run cannot attribute it.
