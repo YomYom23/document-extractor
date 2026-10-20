@@ -373,3 +373,23 @@ registered name. `…LtTdAX` also came back clean (`…(Pty) Ltd`), though the t
 run-to-run variation did it. New: `c_0108653`'s currency came back null (was USD, correct). It is the Mexican seller billing a US customer in
 `$`, the same case Jev got wrong (D30); the currency instruction did not change, and null is what it asks for when the page is unclear. One run
 cannot tell whether the new prompt or variation caused it. No wrong value anywhere.
+
+## D34. Line items (amends D9, D12; grilling Q88 to Q98)
+- LLM only (Q88). The rules stay frozen at `line_items=None`, so all their line fields count as missing; they are the baseline, not improved further.
+- Labels for all 67 invoices (Q89), including held-out and the 9 real ones; held-out is still unseen for line items. Drafted from the PDF text
+  with a throwaway script (not committed), then cross-checked (Q97): the 26 new IEB invoices against the answer keys' `lines`, every invoice
+  by arithmetic (quantity x unit price = line total; lines sum to the subtotal where the page allows), each Sinabis draft read against the page,
+  the real ones confirmed by you. Every disagreement is resolved by reading the page and listed here.
+- What a line is (Q90, Q98): a row in the item table with its own amount. Not lines: shipping, discount and tax rows in the totals block; a
+  discount printed under an item (Stripe's `$40 Promo (-$40.00)`), whose line keeps the amount printed on the item row; repeated table headers;
+  carried-forward, brought-forward and page-subtotal rows. A wrapped description is one string joined with single spaces. A row printing only
+  an amount has null quantity and unit price (D19). Lines keep page order across pages.
+- Scoring (Q91, Q92, Q96): within an invoice, predicted lines pair with labelled lines of identical `line_total` first (duplicates in page
+  order), then the rest pair by page order. Each pair's 4 fields are correct / missing / wrong as for header fields; descriptions match exactly
+  after D12's case and whitespace normalising, with no fuzzy threshold. An unpaired labelled line counts its 4 fields missing; an unpaired
+  predicted line counts each non-null field wrong (D11: an invented value is the dangerous failure). Line fields are a separate block in
+  `score`, never added to the header totals.
+- LLM (Q93, Q95): the same call returns header and line items. Number formats enforced by the API: `line_total` as the header money pattern
+  (`-?\d+\.\d{2}`); `quantity` and `unit_price` as `-?\d+(\.\d{1,4})?`, so `0.125` and `1.5` are not rounded. The header block must stay at
+  or near 468 / 1 / 0; any move is recorded.
+- Build order (Q94): labels, then scorer matching (test-first), then LLM schema and prompt, then a billed run.
