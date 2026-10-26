@@ -400,3 +400,9 @@ cannot tell whether the new prompt or variation caused it. No wrong value anywhe
   amount before tax, the column that sums to the subtotal (Lucid: 36.00, not 39.14). With a per-row discount column, `unit_price` is the
   printed rate and `line_total` the printed amount after discount, so quantity x unit price may differ from it (line-level D20). Units of
   measure are dropped (`14.5 h` gives 14.5). Zero-amount item rows (IONOS `IP address … $0.00`) are lines.
+- Percentage and foreign-currency rows (Q104, Q105): a percentage row (`a_freight-carrier-za-3` `Fuel surcharge 22.5%`,
+  `a_tax-percentage-line-1/-2` `Agency fee on customs value`) has `quantity` = the base figure printed in the Qty / Value column,
+  `unit_price` null, `line_total` = the amount, and the description as printed (keeping `22.5%`, which sits inside the cell). A
+  foreign-currency row (`a_currency-multi-line-nad/-zar`, columns `Ccy | Foreign Amt | Rate | Amount NAD`) has null quantity and unit price,
+  `line_total` in the invoice currency, and no currency code in the description: the foreign amount and rate are a conversion, not a
+  quantity and a price.
