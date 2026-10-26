@@ -6,5 +6,78 @@
   "subtotal": "48759890.00",
   "tax": null,
   "total": "48760272.00",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Ridgerail RR-4400 aluminium mounting rail, 4.4 m",
+      "quantity": "33",
+      "unit_price": "1232.00",
+      "line_total": "40656.00"
+    },
+    {
+      "description": "Norvane NV-62 composite rotor blade, 62 m",
+      "quantity": "1",
+      "unit_price": "9099141.00",
+      "line_total": "9099141.00"
+    },
+    {
+      "description": "Steel tower section, 30 m, welded",
+      "quantity": "1",
+      "unit_price": "4143042.00",
+      "line_total": "4143042.00"
+    },
+    {
+      "description": "PV plug connector pair, 1500 V rated",
+      "quantity": "31",
+      "unit_price": "65.50",
+      "line_total": "2030.50"
+    },
+    {
+      "description": "Combiner box, 12 string inputs with surge protection",
+      "quantity": "7",
+      "unit_price": "16054.00",
+      "line_total": "112378.00"
+    },
+    {
+      "description": "Ultrasonic anemometer, heated",
+      "quantity": "3",
+      "unit_price": "78422.00",
+      "line_total": "235266.00"
+    },
+    {
+      "description": "6 mm2 solar DC cable, UV resistant",
+      "quantity": "379",
+      "unit_price": "68.00",
+      "line_total": "25772.00"
+    },
+    {
+      "description": "Main shaft bearing assembly, series MB-900",
+      "quantity": "1",
+      "unit_price": "1975049.00",
+      "line_total": "1777544.10"
+    },
+    {
+      "description": "Stainless steel roof hook, tile roofs",
+      "quantity": "16",
+      "unit_price": "101.50",
+      "line_total": "1624.00"
+    },
+    {
+      "description": "Kestrel Drive KD-3M planetary gearbox",
+      "quantity": "1",
+      "unit_price": "20940574.00",
+      "line_total": "20940574.00"
+    },
+    {
+      "description": "Gridmark GM-3P smart energy meter",
+      "quantity": "14",
+      "unit_price": "5428.00",
+      "line_total": "72192.40"
+    },
+    {
+      "description": "Zephyrion ZG-4 permanent-magnet generator",
+      "quantity": "1",
+      "unit_price": "12309670.00",
+      "line_total": "12309670.00"
+    }
+  ]
 }

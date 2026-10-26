@@ -6,5 +6,42 @@
   "subtotal": "125675.52",
   "tax": null,
   "total": "125675.52",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Contract Negotiation Support",
+      "quantity": "48.5",
+      "unit_price": "1333.00",
+      "line_total": "61417.97"
+    },
+    {
+      "description": "Video Conference Room Rental for Mediation",
+      "quantity": "3.5",
+      "unit_price": "839.00",
+      "line_total": "2936.50"
+    },
+    {
+      "description": "Corporate Formation Package",
+      "quantity": "1",
+      "unit_price": "9112.00",
+      "line_total": "9112.00"
+    },
+    {
+      "description": "Employment Contract Drafting",
+      "quantity": "14",
+      "unit_price": "2424.00",
+      "line_total": "33936.00"
+    },
+    {
+      "description": "Courier Service for Urgent Documents",
+      "quantity": "7",
+      "unit_price": "308.55",
+      "line_total": "2095.05"
+    },
+    {
+      "description": "Shareholder Dispute Mediation",
+      "quantity": "1",
+      "unit_price": "16178.00",
+      "line_total": "16178.00"
+    }
+  ]
 }

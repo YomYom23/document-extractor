@@ -6,5 +6,18 @@
   "subtotal": "24392.10",
   "tax": "1720.36",
   "total": "26112.46",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Standing Seam Metal Roof Panels (Galvanized Steel)",
+      "quantity": "362",
+      "unit_price": "65.55",
+      "line_total": "23729.10"
+    },
+    {
+      "description": "Chimney Repointing and Cap Installation",
+      "quantity": "1",
+      "unit_price": "663.00",
+      "line_total": "663.00"
+    }
+  ]
 }

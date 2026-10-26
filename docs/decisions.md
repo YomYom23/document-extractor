@@ -408,3 +408,6 @@ cannot tell whether the new prompt or variation caused it. No wrong value anywhe
   quantity and a price.
 - Label cross-check, IEB (Q97): all 25 new drafts match the answer keys' `lines` (description and amount), sum to the subtotal, and
   pass quantity x unit price = line total; percentage rows also pass base x rate = amount. No disagreements to resolve.
+- Label cross-check, Sinabis (Q97): no answer key, so all 20 drafts were read against 2x page renders; every row matched its page. All
+  sum to the subtotal. Quantity x unit price (less any row discount) = line total, except three half-cent rows where the page rounds
+  down (435.435 printed 435.43, 302.445 printed 302.44, 61417.975 printed 61417.97); the label keeps the printed amount.

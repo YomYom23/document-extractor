@@ -6,5 +6,24 @@
   "subtotal": "88106",
   "tax": null,
   "total": "88106",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Gray River Portland Cement Type I Lot 4411-D",
+      "quantity": "28.5",
+      "unit_price": "358",
+      "line_total": "10203.00"
+    },
+    {
+      "description": "Silicone Sealant Clear 300ml",
+      "quantity": "15",
+      "unit_price": "1673",
+      "line_total": "25095.00"
+    },
+    {
+      "description": "Tile Adhesive 20kg Lot 7012-A",
+      "quantity": "16.1",
+      "unit_price": "3280",
+      "line_total": "52808.00"
+    }
+  ]
 }
