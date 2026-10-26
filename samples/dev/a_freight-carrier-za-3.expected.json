@@ -6,5 +6,24 @@
   "subtotal": "43343.94",
   "tax": "6501.59",
   "total": "49845.53",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Linehaul Kitwe - Walvis Bay",
+      "quantity": "1",
+      "unit_price": "34978.05",
+      "line_total": "34978.05"
+    },
+    {
+      "description": "Fuel surcharge 22.5%",
+      "quantity": "34978.05",
+      "unit_price": null,
+      "line_total": "7870.06"
+    },
+    {
+      "description": "Tarping fee",
+      "quantity": "1",
+      "unit_price": "495.83",
+      "line_total": "495.83"
+    }
+  ]
 }

@@ -6,5 +6,30 @@
   "subtotal": "11656.87",
   "tax": "1748.53",
   "total": "13405.40",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Air filter element, heavy duty",
+      "quantity": "4",
+      "unit_price": "825.13",
+      "line_total": "3300.52"
+    },
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "1",
+      "unit_price": "4919.87",
+      "line_total": "4919.87"
+    },
+    {
+      "description": "Nitrile work gloves, size L (pack 12)",
+      "quantity": "7",
+      "unit_price": "93.19",
+      "line_total": "652.33"
+    },
+    {
+      "description": "LED work lamp 24V",
+      "quantity": "9",
+      "unit_price": "309.35",
+      "line_total": "2784.15"
+    }
+  ]
 }

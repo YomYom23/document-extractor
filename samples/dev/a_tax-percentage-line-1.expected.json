@@ -6,5 +6,24 @@
   "subtotal": "4353.39",
   "tax": "653.01",
   "total": "5006.40",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Customs clearance fee",
+      "quantity": "1",
+      "unit_price": "1725.96",
+      "line_total": "1725.96"
+    },
+    {
+      "description": "Agency fee on customs value",
+      "quantity": "160003.53",
+      "unit_price": null,
+      "line_total": "2000.04"
+    },
+    {
+      "description": "Documentation fee",
+      "quantity": "1",
+      "unit_price": "627.39",
+      "line_total": "627.39"
+    }
+  ]
 }

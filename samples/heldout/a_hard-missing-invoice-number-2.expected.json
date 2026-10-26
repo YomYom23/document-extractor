@@ -6,5 +6,30 @@
   "subtotal": "51102.25",
   "tax": "7665.34",
   "total": "58767.59",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Safety boots, steel toe, size 9",
+      "quantity": "5",
+      "unit_price": "593.56",
+      "line_total": "2967.80"
+    },
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "8",
+      "unit_price": "5386.72",
+      "line_total": "43093.76"
+    },
+    {
+      "description": "Nitrile work gloves, size L (pack 12)",
+      "quantity": "18",
+      "unit_price": "120.72",
+      "line_total": "2172.96"
+    },
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "51",
+      "unit_price": "56.23",
+      "line_total": "2867.73"
+    }
+  ]
 }

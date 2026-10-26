@@ -6,5 +6,126 @@
   "subtotal": "25083.76",
   "tax": "3762.56",
   "total": "28846.32",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Pallet strapping kit",
+      "quantity": "7",
+      "unit_price": "195.79",
+      "line_total": "1370.53"
+    },
+    {
+      "description": "Stretch wrap film 500mm x 300m",
+      "quantity": "39",
+      "unit_price": "46.49",
+      "line_total": "1813.11"
+    },
+    {
+      "description": "Engine oil 15W-40, 20 L drum",
+      "quantity": "2",
+      "unit_price": "697.25",
+      "line_total": "1394.50"
+    },
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "1",
+      "unit_price": "397.36",
+      "line_total": "397.36"
+    },
+    {
+      "description": "Safety boots, steel toe, size 9",
+      "quantity": "4",
+      "unit_price": "239.01",
+      "line_total": "956.04"
+    },
+    {
+      "description": "Hex bolts M12 x 50 galvanised (box 50)",
+      "quantity": "7",
+      "unit_price": "107.74",
+      "line_total": "754.18"
+    },
+    {
+      "description": "Copy paper A4 80gsm, box of 5 reams",
+      "quantity": "2",
+      "unit_price": "130.94",
+      "line_total": "261.88"
+    },
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "2",
+      "unit_price": "1586.16",
+      "line_total": "3172.32"
+    },
+    {
+      "description": "LED work lamp 24V",
+      "quantity": "4",
+      "unit_price": "182.25",
+      "line_total": "729.00"
+    },
+    {
+      "description": "Ratchet straps 50mm x 9m (4)",
+      "quantity": "3",
+      "unit_price": "112.09",
+      "line_total": "336.27"
+    },
+    {
+      "description": "Nitrile work gloves, size L (pack 12)",
+      "quantity": "12",
+      "unit_price": "27.92",
+      "line_total": "335.04"
+    },
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "8",
+      "unit_price": "21.36",
+      "line_total": "170.88"
+    },
+    {
+      "description": "Toner cartridge, black, high yield",
+      "quantity": "4",
+      "unit_price": "532.80",
+      "line_total": "2131.20"
+    },
+    {
+      "description": "Air filter element, heavy duty",
+      "quantity": "4",
+      "unit_price": "173.54",
+      "line_total": "694.16"
+    },
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "7",
+      "unit_price": "44.29",
+      "line_total": "310.03"
+    },
+    {
+      "description": "Pallet strapping kit (batch 2)",
+      "quantity": "3",
+      "unit_price": "147.10",
+      "line_total": "441.30"
+    },
+    {
+      "description": "Stretch wrap film 500mm x 300m (batch 2)",
+      "quantity": "13",
+      "unit_price": "39.18",
+      "line_total": "509.34"
+    },
+    {
+      "description": "Engine oil 15W-40, 20 L drum (batch 2)",
+      "quantity": "10",
+      "unit_price": "518.65",
+      "line_total": "5186.50"
+    },
+    {
+      "description": "Brake pads, trailer axle set (batch 2)",
+      "quantity": "4",
+      "unit_price": "576.57",
+      "line_total": "2306.28"
+    },
+    {
+      "description": "Safety boots, steel toe, size 9 (batch 2)",
+      "quantity": "8",
+      "unit_price": "226.73",
+      "line_total": "1813.84"
+    }
+  ]
 }

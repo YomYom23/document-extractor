@@ -406,3 +406,5 @@ cannot tell whether the new prompt or variation caused it. No wrong value anywhe
   foreign-currency row (`a_currency-multi-line-nad/-zar`, columns `Ccy | Foreign Amt | Rate | Amount NAD`) has null quantity and unit price,
   `line_total` in the invoice currency, and no currency code in the description: the foreign amount and rate are a conversion, not a
   quantity and a price.
+- Label cross-check, IEB (Q97): all 25 new drafts match the answer keys' `lines` (description and amount), sum to the subtotal, and
+  pass quantity x unit price = line total; percentage rows also pass base x rate = amount. No disagreements to resolve.
