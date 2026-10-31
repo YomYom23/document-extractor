@@ -26,6 +26,7 @@ module-root = ""
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.13.1",
     "mypy>=2.4.0",
     "pytest>=9.1.1",
     "ruff>=0.17.1",
@@ -38,3 +39,5 @@ testpaths = ["tests"]
 
 [tool.mypy]
 strict = true
+# Local drafting scripts for D34 labels; git-ignored, not part of the project.
+exclude = ["^line-drafts/"]
