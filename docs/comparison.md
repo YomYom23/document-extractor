@@ -2,7 +2,7 @@
 
 Step 8 (D17, D29). All runs are at commit `b488ce4`, on 2026-10-19, with
 `uv run --env-file .env document-extractor score --extractor <name> --set <dev|heldout>`.
-The extractors were frozen for these runs (D29, Q62).
+The extractors were frozen for these runs (D29).
 
 ## Verdict
 
@@ -97,7 +97,7 @@ to call. Its answers did not.
 
 - **LLM dates (D26).** The first LLM run had 9 of 63 dev fields **wrong**, not missing: every `issue_date` got a year built from the printed
   day and month (`30.04.2026` became 3004-04-30). In this whole project that is the only time any extractor gave a wrong value: the dangerous
-  failure D11 ranks worst. The cause was asking for one `YYYY-MM-DD` string; asking for year, month and day as three numbers fixed it (Q47).
+  failure D11 ranks worst. The cause was asking for one `YYYY-MM-DD` string; asking for year, month and day as three numbers fixed it (D26).
   The fix was found on dev before any held-out run, and held-out then confirmed it (4 of 4 dates, 3 runs).
 - **Jev threshold (D25).** It stays at 0.8, set from 13 snippet and invoice cases. Both dev `$` invoices cleared it in all three runs.
 
@@ -108,9 +108,9 @@ to call. Its answers did not.
 - **Synthetic layouts.** All samples are synthetic and come from two generators (D19). Real supplier invoices vary more: scans, multiple
   pages, credit notes and dual currencies are all out of scope.
 - **Held-out has now been used.** Fixing what it exposed (N5 `18-Mar-2025`, N12 `K`) would tune the rules to it. Any later change needs new
-  held-out samples to be measured fairly (Q62).
+  held-out samples to be measured fairly (D29).
 - **Three runs.** Enough to see that the LLM's answers were stable here, not to estimate how often it is wrong.
-- **Header fields only.** Line items were not extracted or scored (D12).
+- **Header fields only.** Line items were not extracted or scored (D34, not built yet).
 
 ## Wider set (D30), 2026-10-19
 

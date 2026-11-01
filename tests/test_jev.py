@@ -81,7 +81,7 @@ def test_a_server_error_becomes_jev_error() -> None:
 
 
 def test_the_usage_of_the_last_call_is_kept() -> None:
-    # For the cost and size report in `score` (D29, Q59).
+    # For the cost and size report in `score` (D29).
     jev = jev_answering(200, DOCS_RESPONSE, [])
     assert jev.last_usage is None  # no call yet
     jev.ask("my parcel is late", QUESTIONS)

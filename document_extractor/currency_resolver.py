@@ -20,7 +20,7 @@ from document_extractor.schema import Invoice
 # pass a fake without any network or API key.
 AskJev = Callable[[str, Mapping[str, Choice]], Mapping[str, ChoiceAnswer]]
 
-# Starting value (D25, Q34). Calibration is TypeSafe's claim, so the final
+# Starting value (D25). Calibration is TypeSafe's claim, so the final
 # value comes from the live snippet run and is recorded in D25.
 MIN_CONFIDENCE = 0.8
 # "$" straight before a number ("$12,731.44", "$ 25.99").
@@ -35,7 +35,7 @@ CURRENCY_QUESTION = Choice(
         "The customer's address can be in a different country from the seller's."
     ),
     # Only codes from this list can come back, so the worst case is "missing",
-    # never a currency that was not offered (D25, Q33).
+    # never a currency that was not offered (D25).
     criteria={
         "USD": "United States dollar",
         "CAD": "Canadian dollar",
@@ -60,7 +60,7 @@ def resolve_currency(
     if invoice.currency is not None:
         return invoice  # the rules already found it; never second-guess them
     if not DOLLAR_AMOUNT.search(page_text):
-        return invoice  # null for another reason, not a bare "$" (D25, Q32)
+        return invoice  # null for another reason, not a bare "$" (D25)
     try:
         answer = ask(page_text, {QUESTION_KEY: CURRENCY_QUESTION})[QUESTION_KEY]
     except JevError:

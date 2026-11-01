@@ -38,7 +38,7 @@ uv run --env-file .env document-extractor score --set dev --extractor llm
 - Every extractor has the signature `extract(pdf_path) -> Invoice`.
 - Missing is `null`, never a guess; money is `Decimal`.
 - Only header fields are extracted and scored so far; line items (D34) are
-  in progress.
+  decided but not built yet.
 - The held-out set is for the final comparison only. Its text never shapes a
   rule or a prompt.
 - Each change ends with pytest, ruff and mypy all clean (D13).

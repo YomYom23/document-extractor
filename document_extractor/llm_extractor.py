@@ -17,7 +17,7 @@ from document_extractor.pdf_reader import read_pdf
 from document_extractor.schema import Invoice
 from document_extractor.token_usage import TokenUsage
 
-DEFAULT_MODEL = "gpt-6-luna"  # D26, Q39
+DEFAULT_MODEL = "gpt-6-luna"  # D26: the model is one setting, so another can be added
 # gpt-6-luna's prices in dollars per million tokens, checked 2026-10-17 (D26).
 # Tied to DEFAULT_MODEL: a different model needs its own prices here.
 INPUT_DOLLARS_PER_MILLION_TOKENS = 0.10
@@ -97,14 +97,14 @@ def to_invoice(llm_invoice: LlmInvoice) -> Invoice:
         subtotal=money(llm_invoice.subtotal),
         tax=money(llm_invoice.tax),
         total=money(llm_invoice.total),
-        line_items=None,  # header fields only (D26)
+        line_items=None,  # D34: line items not extracted yet
     )
 
 
 def issue_date_from_parts(
     year: int | None, month: int | None, day: int | None
 ) -> date | None:
-    """Join the model's three date numbers into a date, or None (D26, Q47)."""
+    """Join the model's three date numbers into a date, or None (D26)."""
     if year is None or month is None or day is None:
         # A missing part is never filled in by guessing (D11).
         return None

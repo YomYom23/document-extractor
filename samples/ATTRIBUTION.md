@@ -1,6 +1,6 @@
 # Sample attribution
 
-All invoices are synthetic. The PDFs are unmodified copies; the `*.expected.json` labels were written for this
+The `a_`, `b_` and `c_` invoices are synthetic; the `r_` invoices are real and not distributed (see below). The PDFs are unmodified copies; the `*.expected.json` labels were written for this
 project from the PDF text (the datasets' own answer keys were used only as a cross-check).
 
 ## Files starting with `a_`
@@ -20,14 +20,14 @@ The file name after `b_` is the invoice id.
 its SHA-256 matches the benchmark's answer file (`f0d5c7ac...0841c1`).
 
 The 25 `a_` files added in D30 are further documents from the same Invoice Extraction Benchmark v1 source and licence. Each PDF's SHA-256
-matches the benchmark's manifest. Their labels are header-only (`line_items` is `null`).
+matches the benchmark's manifest. Their labels include line items (D34).
 
 ## Files starting with `c_`
 
 Sinabis Green Energy – Synthetic Document Dataset (1M PDFs), Sinabis GmbH (2026), licensed CC BY 4.0
 (https://creativecommons.org/licenses/by/4.0/).
 Source: https://huggingface.co/datasets/sinabis-group/sinabis-1m-synthetic-pdf (`Sinabis_1M_pdfs_part_01.zip`, `pdf/invoice/`).
-The file name after `c_` is the file's name in the archive. The PDFs are unmodified; labels are header-only.
+The file name after `c_` is the file's name in the archive. The PDFs are unmodified; labels include line items (D34).
 
 ## Files starting with `r_`
 

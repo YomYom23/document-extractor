@@ -7,7 +7,7 @@ from document_extractor.schema import Invoice
 
 SAMPLES_DIRECTORY = Path(__file__).parent.parent / "samples"
 SAMPLE_SETS = ("dev", "heldout")
-# Your own invoices are git-ignored (D30, Q75), so a fresh clone has none;
+# Your own invoices are git-ignored (D30), so a fresh clone has none;
 # the checks below cover them only where they exist.
 PRIVATE_DIRECTORY = SAMPLES_DIRECTORY / "private"
 
@@ -46,8 +46,8 @@ def test_label_parses_and_has_a_matching_pdf(label_path: Path) -> None:
     # A label with nothing in it would score every extractor as "correct" by returning nothing.
     assert invoice.vendor_name is not None
     assert invoice.total is not None
-    # Labels added in D30 are header-only (line_items null); an empty list
-    # would instead claim "the invoice has no lines" (D18).
+    # A label's line_items is null (not labelled yet) or a list; an empty list
+    # would claim "the invoice has no lines" (D18).
     assert invoice.line_items != []
 
 

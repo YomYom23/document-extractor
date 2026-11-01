@@ -1,8 +1,8 @@
-"""Read a digital PDF into plain Python objects (decisions D14, D23, D32).
+"""Read a digital PDF into plain Python objects.
 
-This is the only module that imports a PDF library (pdfplumber, and pdfium for
-the NUL repair). Everything after it sees our own frozen dataclasses, so the
-libraries can be swapped by changing this file.
+This is the only module that imports a PDF library (D14: pdfplumber, and pdfium
+for the NUL repair of D32). Everything after it sees our own frozen dataclasses
+(D23), so the libraries can be swapped by changing this file.
 """
 
 from dataclasses import dataclass
@@ -22,7 +22,7 @@ class NoTextLayerError(Exception):
 # What a broken ToUnicode table turns a glyph into (D32).
 NUL_CHARACTER = "\x00"
 # Unicode's own "unknown character" mark, written where no repair is possible
-# (D32, Q81): visible in any viewer, where a NUL hides.
+# (D32): visible in any viewer, where a NUL hides.
 UNREADABLE_CHARACTER = "\ufffd"
 
 
