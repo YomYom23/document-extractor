@@ -51,8 +51,8 @@ there; the old log, with live runs and diagnoses, is
   `TypeSafeClient` and calls Jev (other modules import only the `Choice` and
   `ChoiceAnswer` types), and only `llm_extractor.py` imports OpenAI.
 - Line items are in the schema but not extracted yet: both extractors return
-  `line_items=None`, and the scorer compares `HEADER_FIELDS` only (D34 is in
-  progress).
+  `line_items=None`, and the scorer compares `HEADER_FIELDS` only (D34, not
+  built yet).
 - The rules extractor never calls a model. The resolver never overrides a
   currency the rules found, and only runs when the page has a bare `$` (D25).
 - A Jev failure leaves the currency `None`. An LLM failure raises

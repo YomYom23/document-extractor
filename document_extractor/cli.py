@@ -39,17 +39,17 @@ from document_extractor.token_usage import TokenUsage
 Extract = Callable[[Path], Invoice]
 
 EXTRACTOR_NAMES = ("rules", "rules-jev", "llm")  # the comparison's rows (D25)
-# The key each billed extractor's SDK reads from the environment (Q55).
+# The key each billed extractor's SDK reads from the environment (D28).
 REQUIRED_KEYS = {"rules-jev": "TYPESAFE_API_KEY", "llm": "OPENAI_API_KEY"}
 SAMPLES_DIRECTORY = Path(__file__).parent.parent / "samples"
 # The file-name prefix says where a sample came from (samples/ATTRIBUTION.md,
 # D30). `score` prints a subtotal per source so "how does it do on real
-# invoices" is not hidden inside the overall count (Q76).
+# invoices" is not hidden inside the overall count (D30).
 SOURCE_NAMES = {"a": "ieb", "b": "invoicebench", "c": "sinabis", "r": "real"}
 
 
 def set_directories(sample_set: str) -> list[Path]:
-    """Public samples plus the git-ignored private ones of the same set (Q75)."""
+    """Public samples plus the git-ignored private ones of the same set (D30)."""
     return [SAMPLES_DIRECTORY / sample_set, SAMPLES_DIRECTORY / "private" / sample_set]
 
 
@@ -102,7 +102,7 @@ class UsageReportingExtractor(Protocol):
 
 
 def metered_ask(jev: UsageReportingJev, meter: CallMeter) -> AskJev:
-    """`jev.ask`, counting calls, failures and tokens (Q60). The resolver
+    """`jev.ask`, counting calls, failures and tokens (D29). The resolver
     still sees every JevError, so it still leaves the currency null (D25)."""
 
     def ask(state: str, questions: Mapping[str, Choice]) -> Mapping[str, ChoiceAnswer]:
@@ -123,7 +123,7 @@ def metered_ask(jev: UsageReportingJev, meter: CallMeter) -> AskJev:
 
 def metered_llm(llm: UsageReportingExtractor, meter: CallMeter) -> Extract:
     """`llm.extract`, counting the replies that came back and their tokens
-    (Q59). Failures are already counted by `score` as failed extractions."""
+    (D29). Failures are already counted by `score` as failed extractions."""
 
     def extract(pdf_path: Path) -> Invoice:
         try:
@@ -268,7 +268,7 @@ def run_score(
     for field_name, counts in dataset_score.per_field.items():
         print(format_counts(field_name, counts))
     # Time and spend are printed after the counts and are not part of any
-    # score: extractors are ranked on accuracy only (D29, Q59).
+    # score: extractors are ranked on accuracy only (D29).
     invoice_count = max(dataset_score.invoice_count, 1)  # no division by zero
     print(
         f"\n{'time':16}{seconds_spent / invoice_count:.2f} s per invoice, "

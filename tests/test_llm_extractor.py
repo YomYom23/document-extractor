@@ -33,7 +33,7 @@ def test_money_strings_become_exact_decimals() -> None:
     assert invoice.subtotal == Decimal("346.50")
     assert invoice.vendor_name == "Acme Industrial Supply Co"
     assert invoice.issue_date == date(2024, 3, 12)
-    assert invoice.line_items is None  # header fields only (D26)
+    assert invoice.line_items is None  # D34: line items not extracted yet
 
 
 def invoice_dated(year: int | None, month: int | None, day: int | None) -> LlmInvoice:
@@ -62,7 +62,7 @@ def test_the_three_date_numbers_become_one_date() -> None:
 def test_a_partial_date_is_null_not_completed(
     year: int | None, month: int | None, day: int | None
 ) -> None:
-    # D11 and the Q47 amendment: never fill in a missing part by guessing.
+    # D11 and the D26 date change: never fill in a missing part by guessing.
     assert to_invoice(invoice_dated(year, month, day)).issue_date is None
 
 
@@ -73,7 +73,7 @@ def test_a_partial_date_is_null_not_completed(
 def test_an_impossible_date_is_null_not_an_error(
     year: int, month: int, day: int
 ) -> None:
-    # The other fields are still good, so the date scores as missing (Q47).
+    # The other fields are still good, so the date scores as missing (D26).
     assert to_invoice(invoice_dated(year, month, day)).issue_date is None
 
 
@@ -234,7 +234,7 @@ USAGE = {
 
 
 def test_the_usage_of_the_last_call_is_kept() -> None:
-    # For the cost report in `score` (D29, Q59).
+    # For the cost report in `score` (D29).
     body = response_body(text_content(ACME_JSON), usage=USAGE)
     extractor = extractor_answering(200, body, [])
     assert extractor.last_usage is None  # no call yet

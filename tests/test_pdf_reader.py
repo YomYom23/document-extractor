@@ -165,6 +165,6 @@ def test_a_nul_nothing_can_repair_becomes_the_unknown_character_mark(
     broken_pdf = tmp_path / "broken.pdf"
     write_pdf_with_broken_glyph(broken_pdf)
     page = read_pdf(broken_pdf).pages[0]
-    # U+FFFD, not NUL and not whatever placeholder pdfium uses (D32, Q81).
+    # U+FFFD, not NUL and not whatever placeholder pdfium uses (D32).
     assert page.text == "AB\ufffdC"
     assert [word.text for word in page.words] == ["AB\ufffdC"]
