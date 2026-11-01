@@ -6,9 +6,10 @@ The package that turns a digital PDF invoice into an `Invoice` and scores it
 against a hand-written label. It holds three extractors that share one
 signature, `extract(pdf_path) -> Invoice` (D5): rules only, rules plus the Jev
 currency resolver, and an OpenAI model. The CLI wires them to the samples and
-prints the scores. The reasons behind each choice are in
-[docs/decisions.md](../docs/decisions.md); the D and Q numbers in the code point
-there.
+prints the scores. The rules behind each choice are in
+[docs/decisions.md](../docs/decisions.md), and the D numbers in the code point
+there; the old log, with live runs and diagnoses, is
+[docs/decisions-history.md](../docs/decisions-history.md).
 
 ## Interface
 

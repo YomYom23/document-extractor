@@ -19,8 +19,10 @@ uv run --env-file .env document-extractor score --set dev --extractor llm
   the schema, PDF reader, the three extractors, the scorer and the CLI.
 - scripts: [./scripts/README.md](./scripts/README.md) - billed live checks,
   run by hand from the repo root.
-- docs: no code. [decisions.md](./docs/decisions.md) is the decision log
-  (D1 onward; the D and Q numbers in the code point here),
+- docs: no code. [decisions.md](./docs/decisions.md) holds the current rules
+  (D1 onward; the D numbers in the code point here), with a one-line-per-entry
+  [decisions-index.md](./docs/decisions-index.md) and the frozen old log in
+  [decisions-history.md](./docs/decisions-history.md),
   [comparison.md](./docs/comparison.md) is the write-up of the scores, and
   [null-sources.md](./docs/null-sources.md) lists why each field can come
   back null.

@@ -1,5 +1,24 @@
 # Decision log
 
+Frozen on 2026-11-01. The current rules are in [decisions.md](decisions.md). Do not edit below this line.
+
+Q numbers below are grilling questions. Each belongs to one decision:
+
+| Q | D |
+| --- | --- |
+| Q24 to Q31 | D24 |
+| Q32 to Q38 | D25 |
+| Q39 to Q47 | D26 (Q47 is in the body) |
+| Q48 to Q56 | D28 |
+| Q57 to Q63 | D29 |
+| Q64 to Q76 | D30 |
+| Q77 | D31 |
+| Q78 to Q83 | D32 |
+| Q84 to Q87 | D33 |
+| Q88 to Q105 | D34 (the heading says Q98; the body continues to Q105) |
+
+D1 to D23 recorded no Q numbers, so Q1 to Q23 have no row.
+
 One entry per decision: what was chosen, the alternatives, and why. Decided 2026-10-16 in a grilling session.
 
 ## D1. Purpose: learning and portfolio project
