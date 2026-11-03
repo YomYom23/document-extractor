@@ -30,7 +30,10 @@ there; the old log, with live runs and diagnoses, is
   `LlmInvoice`, `to_invoice`, `issue_date_from_parts`, `LlmExtractionError`,
   `DEFAULT_MODEL` and its per-million-token prices.
 - `scoring.py`: `score_invoice`, `score_field`, `score_dataset`,
-  `DatasetScore`, `Outcome` (`correct`, `missing`, `wrong`), `HEADER_FIELDS`.
+  `DatasetScore`, `Outcome` (`correct`, `missing`, `wrong`), `HEADER_FIELDS`;
+  for line items `pair_lines`, `LinePair`, `PairPass`, `score_lines`,
+  `ScoredPair`, `InvoiceLineScore`, `score_line_dataset`, `LineDatasetScore`,
+  `LINE_FIELDS`.
 - `arithmetic_check.py`: `arithmetic_warning(invoice) -> str | None`.
 - `token_usage.py`: `TokenUsage`, one token-count shape for both vendors.
 - `cli.py`: `main(argv, extractors) -> int`, the `document-extractor` command
@@ -50,9 +53,13 @@ there; the old log, with live runs and diagnoses, is
 - Only `pdf_reader.py` imports a PDF library, only `jev.py` builds a
   `TypeSafeClient` and calls Jev (other modules import only the `Choice` and
   `ChoiceAnswer` types), and only `llm_extractor.py` imports OpenAI.
-- Line items are in the schema but not extracted yet: both extractors return
-  `line_items=None`, and the scorer compares `HEADER_FIELDS` only (D34, not
+- Line items are in the schema but not extracted yet: every extractor returns
+  `line_items=None`. The scorer pairs and scores line items as a separate
+  block (`score_lines`, D34.5), which `score` does not print yet (D34, not
   built yet).
+- Line pairing uses identical totals and identical descriptions only, with
+  page order as the tie-break inside a group of equal totals. Every field of
+  an unpaired row counts against the run (D34.5).
 - The rules extractor never calls a model. The resolver never overrides a
   currency the rules found, and only runs when the page has a bare `$` (D25).
 - A Jev failure leaves the currency `None`. An LLM failure raises
