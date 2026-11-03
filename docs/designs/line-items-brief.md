@@ -1,5 +1,8 @@
 # Line-item extraction (D34, LLM only)
 
+> Superseded by [line-items.md](line-items.md) on 2026-11-03; its open items
+> are resolved there. The body below is not edited.
+
 * **Author:** Yomi O Lebi
 * **Date:** 2026-10-28
 
