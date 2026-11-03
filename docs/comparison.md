@@ -196,3 +196,20 @@ never for address parts (D33). LLM re-run, one run, both sets: 67 billed calls, 
 - `…(Pty) LtTdAX` came back as `…(Pty) Ltd`, though the text layer did not change; one run cannot say whether the prompt or variation did it.
 - New missing value: `c_0108653`'s currency is null (was USD, correct): a Mexican seller billing a US customer in `$`, the case Jev got wrong.
   The currency instruction did not change, and null is what it asks for when the page is unclear. One run cannot attribute it.
+
+## Line items (D34)
+
+The runs of the D34.8 loop: header baseline, baseline line run, fix rounds and final runs.
+
+### Header baseline, 2026-11-03
+
+Commit `2c7049b`, before any line-item code. Three LLM dev runs (D34.8.1), 38 invoices each, 0 failed extractions in every run.
+
+| Run | Correct | Missing | Wrong | Calls | Input + output tokens | Cost |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 266 | 0 | 0 | 38 | 40,897 + 3,136 | $0.005658 |
+| 2 | 266 | 0 | 0 | 38 | 40,897 + 3,175 | $0.005677 |
+| 3 | 266 | 0 | 0 | 38 | 40,897 + 3,168 | $0.005674 |
+
+Guard values: header wrong 0, header missing 0. Every header field was correct in all three runs, including `c_0108653`'s currency, which
+was null in the D33 run. A later run with any header wrong or missing value is over the guard.
