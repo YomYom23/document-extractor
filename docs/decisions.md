@@ -348,7 +348,9 @@ printed otherwise, and never address parts. Its example suffixes are generic (Lt
    3. At most 3 fix rounds. A round is one committed change to the prompt or the field descriptions, plus one dev run. Progress means
       line wrong + missing went down and line wrong did not go up. A run whose only failures are API errors is repeated before it is
       judged. A round with no progress, a header wrong or missing count above its guard value, or a cut-off or schema failure is
-      reverted and ends the loop.
+      reverted and ends the loop. A null currency on `c_0108653` is left out of the header missing count for the guard: a Mexican
+      seller bills a US customer in bare `$`, the USD label comes from the dataset manifest, and null is the D11 answer on that page.
+      A wrong currency there still counts.
    4. Final runs (D29.4): 3 dev runs, then 3 held-out runs, at the frozen commit (HEAD after the loop's last commit, clean tree, hash
       recorded before the first final run). No prompt or schema change after held-out is seen; a scorer bug may be fixed and all 6 runs
       repeated, marked as a re-run.

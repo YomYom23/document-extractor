@@ -382,7 +382,9 @@ implementation steps refer to it.
     are API errors (`OpenAI call failed`) is repeated before it is judged; a
     cut-off or schema failure counts against the round. A round is reverted,
     and the loop ends, when it shows no progress, when its header wrong or
-    header missing count exceeds its guard value, or when it has a cut-off or
+    header missing count exceeds its guard value (a null currency on
+    `c_0108653`, an ambiguous bare-`$` page, is left out of the missing
+    count; owner decision, 2026-11-03), or when it has a cut-off or
     schema failure.
 4.  **Final runs.** The frozen commit is the last commit kept by the loop,
     with a clean working tree, recorded by hash. At it: 3 dev runs, then 3
