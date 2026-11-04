@@ -32,7 +32,15 @@ from document_extractor.llm_extractor import (
 )
 from document_extractor.pdf_reader import NoTextLayerError
 from document_extractor.schema import Invoice
-from document_extractor.scoring import Outcome, score_dataset, score_invoice
+from document_extractor.scoring import (
+    LINE_FIELDS,
+    LineDatasetScore,
+    Outcome,
+    score_dataset,
+    score_invoice,
+    score_line_dataset,
+    score_lines,
+)
 from document_extractor.token_usage import TokenUsage
 
 # Every extractor has this shape (D5), so the CLI treats the three alike.
@@ -225,6 +233,10 @@ def run_score(
 ) -> None:
     pairs: list[tuple[Invoice, Invoice]] = []
     pairs_by_source: dict[str, list[tuple[Invoice, Invoice]]] = {}
+    # Only the LLM extracts line items (D34), so only its runs print them:
+    # rules and rules-jev output stays as it was.
+    show_lines = extractor_name == "llm"
+    line_results: list[tuple[str, Invoice, Invoice]] = []
     failed_extractions = 0
     seconds_spent = 0.0
 
@@ -255,6 +267,9 @@ def run_score(
             (predicted, expected)
         )
         print_invoice_result(pdf_path.stem, predicted, expected)
+        if show_lines:
+            print_line_result(predicted, expected)
+            line_results.append((pdf_path.stem, predicted, expected))
 
     dataset_score = score_dataset(pairs)
     print(
@@ -267,6 +282,10 @@ def run_score(
         print(format_counts(f"  {source}", source_score.overall))
     for field_name, counts in dataset_score.per_field.items():
         print(format_counts(field_name, counts))
+    if show_lines:
+        print()
+        for text in format_line_summary(score_line_dataset(line_results)):
+            print(text)
     # Time and spend are printed after the counts and are not part of any
     # score: extractors are ranked on accuracy only (D29).
     invoice_count = max(dataset_score.invoice_count, 1)  # no division by zero
@@ -313,6 +332,77 @@ def print_invoice_result(name: str, predicted: Invoice, expected: Invoice) -> No
                 f"{'':32}{field_name}: got {getattr(predicted, field_name)!r}, "
                 f"label {getattr(expected, field_name)!r}"
             )
+
+
+def print_line_result(predicted: Invoice, expected: Invoice) -> None:
+    """The line items of one invoice, under its header line (D34.5). Rows are
+    numbered from 1: L for labelled rows, P for predicted ones."""
+    score = score_lines(predicted, expected)
+    if score is None:
+        print(f"{'':32}lines: skipped, label null")
+        return
+    if not predicted.line_items:
+        print(
+            f"{'':32}lines: no prediction ({predicted.line_items!r}), "
+            f"{score.unpaired_labels} labelled unpaired"
+        )
+        return
+    print(
+        f"{'':32}lines: {score.labelled} labelled, {score.predicted} predicted, "
+        f"{score.by_total} paired by total, {score.by_description} paired by "
+        f"description, {score.unpaired_labels} labelled unpaired, "
+        f"{score.invented} invented"
+    )
+    labelled = expected.line_items or []
+    predictions = predicted.line_items
+    # Failing fields of pairs first, then unpaired labels, then invented rows.
+    for scored in score.pairs:
+        pair = scored.pair
+        if pair.label_index is None or pair.predicted_index is None:
+            continue
+        label = labelled[pair.label_index]
+        prediction = predictions[pair.predicted_index]
+        for field_name, outcome in scored.outcomes.items():
+            if outcome is not Outcome.CORRECT:
+                print(
+                    f"{'':32}L{pair.label_index + 1}-P{pair.predicted_index + 1} "
+                    f"({pair.pass_}) {field_name} {outcome}: "
+                    f"got {getattr(prediction, field_name)!r}, "
+                    f"label {getattr(label, field_name)!r}"
+                )
+    for scored in score.pairs:
+        if scored.pair.predicted_index is None and scored.pair.label_index is not None:
+            row = labelled[scored.pair.label_index].model_dump()
+            print(f"{'':32}L{scored.pair.label_index + 1} unpaired: {row!r}")
+    for scored in score.pairs:
+        if scored.pair.label_index is None and scored.pair.predicted_index is not None:
+            row = predictions[scored.pair.predicted_index].model_dump()
+            print(f"{'':32}P{scored.pair.predicted_index + 1} invented: {row!r}")
+
+
+def format_line_summary(score: LineDatasetScore) -> list[str]:
+    """The line block printed after the header counts (D34.5)."""
+    summary = [
+        "line items",
+        format_counts("lines overall", score.overall),
+        *(format_counts(name, score.per_field[name]) for name in LINE_FIELDS),
+        f"invented {score.invented}",
+        f"labelled unpaired {score.unpaired_labels}",
+    ]
+    # One invoice holds 38% of dev rows, so the counts are also shown without
+    # it; with nothing scored there is no largest invoice to leave out.
+    if score.largest_name is None:
+        summary.append("largest invoice: none")
+    else:
+        summary += [
+            (
+                f"largest invoice: {score.largest_name}, "
+                f"{score.largest_labelled} labelled rows"
+            ),
+            format_counts("lines excl. top", score.overall_without_largest),
+        ]
+    summary.append(f"skipped {score.skipped_count} invoices (label null)")
+    return summary
 
 
 def format_counts(name: str, counts: Counter[Outcome]) -> str:

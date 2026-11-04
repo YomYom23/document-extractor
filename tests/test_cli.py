@@ -1,4 +1,6 @@
 import json
+import time
+from collections import Counter
 from collections.abc import Callable, Mapping
 from decimal import Decimal
 from pathlib import Path
@@ -9,16 +11,18 @@ from typesafe_sdk import Choice, ChoiceAnswer
 from document_extractor import cli
 from document_extractor.cli import (
     CallMeter,
+    format_line_summary,
     format_meter,
     main,
     metered_ask,
     metered_llm,
+    print_line_result,
 )
 from document_extractor.jev import JevError
 from document_extractor.llm_extractor import LlmExtractionError
 from document_extractor.pdf_reader import NoTextLayerError
-from document_extractor.schema import Invoice
-from document_extractor.scoring import Outcome, score_invoice
+from document_extractor.schema import Invoice, LineItem
+from document_extractor.scoring import LineDatasetScore, Outcome, score_invoice
 from document_extractor.token_usage import TokenUsage
 
 DEV_DIRECTORY = Path(__file__).parent.parent / "samples" / "dev"
@@ -301,3 +305,196 @@ def test_score_reports_the_time_per_invoice(
 ) -> None:
     main(["score"])
     assert "s per invoice" in capsys.readouterr().out
+
+
+# The full rules output on sample_tree, captured before line output was added:
+# line items must not change what the rules and rules-jev runs print (D34).
+RULES_SCORE_OUTPUT = """\
+a_clean-de-grid-eu-decimals    all correct
+b_INV-2026-0129                {'currency': 'missing', 'subtotal': 'missing', 'total': 'missing'}
+r_test                         all correct
+
+3 invoices, 0 failed extractions
+overall         correct 18  missing 3  wrong 0
+  ieb           correct 7  missing 0  wrong 0
+  invoicebench  correct 4  missing 3  wrong 0
+  real          correct 7  missing 0  wrong 0
+vendor_name     correct 3  missing 0  wrong 0
+invoice_number  correct 3  missing 0  wrong 0
+issue_date      correct 3  missing 0  wrong 0
+currency        correct 2  missing 1  wrong 0
+subtotal        correct 2  missing 1  wrong 0
+tax             correct 3  missing 0  wrong 0
+total           correct 2  missing 1  wrong 0
+
+time            0.00 s per invoice, 0.00 s total
+"""
+
+
+def test_rules_score_output_is_unchanged(
+    sample_tree: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # A fixed clock, so the time line is the same on every run.
+    monkeypatch.setattr(time, "perf_counter", lambda: 0.0)
+    main(["score"])
+    assert capsys.readouterr().out == RULES_SCORE_OUTPUT
+
+
+# --- line items (D34.5) ------------------------------------------------------
+
+INDENT = " " * 32
+
+
+def line(
+    description: str | None,
+    line_total: str | None,
+    quantity: str | None = None,
+    unit_price: str | None = None,
+) -> LineItem:
+    return LineItem(
+        description=description,
+        quantity=None if quantity is None else Decimal(quantity),
+        unit_price=None if unit_price is None else Decimal(unit_price),
+        line_total=None if line_total is None else Decimal(line_total),
+    )
+
+
+def printed_lines(
+    predicted: Invoice, expected: Invoice, capsys: pytest.CaptureFixture[str]
+) -> list[str]:
+    print_line_result(predicted, expected)
+    return capsys.readouterr().out.splitlines()
+
+
+def test_the_line_result_lists_counts_failing_fields_unpaired_and_invented(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    expected = Invoice(
+        line_items=[
+            line("Widget", "10.00", quantity="2", unit_price="5.00"),
+            line("Freight", "9.00"),
+            line("Bolts", "3.00"),
+        ]
+    )
+    predicted = Invoice(
+        line_items=[
+            line("Widget", "10.00", quantity="2", unit_price="5.00"),
+            line("Bolts", "30.00"),
+            line(None, "9.50"),
+        ]
+    )
+
+    # Row numbers are 1-based, as a person counts rows on the page.
+    assert printed_lines(predicted, expected, capsys) == [
+        (
+            f"{INDENT}lines: 3 labelled, 3 predicted, 1 paired by total, "
+            "1 paired by description, 1 labelled unpaired, 1 invented"
+        ),
+        (
+            f"{INDENT}L3-P2 (description) line_total wrong: "
+            "got Decimal('30.00'), label Decimal('3.00')"
+        ),
+        (
+            f"{INDENT}L2 unpaired: {{'description': 'Freight', 'quantity': None, "
+            "'unit_price': None, 'line_total': Decimal('9.00')}"
+        ),
+        (
+            f"{INDENT}P3 invented: {{'description': None, 'quantity': None, "
+            "'unit_price': None, 'line_total': Decimal('9.50')}"
+        ),
+    ]
+
+
+def test_a_missing_field_in_a_pair_is_printed_with_its_outcome(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    expected = Invoice(line_items=[line("Widget", "10.00", quantity="2")])
+    predicted = Invoice(line_items=[line("widget ", "10.00")])
+
+    # "widget " against "Widget" is correct (D12); the null quantity is not.
+    assert printed_lines(predicted, expected, capsys)[1:] == [
+        f"{INDENT}L1-P1 (total) quantity missing: got None, label Decimal('2')",
+    ]
+
+
+@pytest.mark.parametrize(("line_items", "shown"), [(None, "None"), ([], "[]")])
+def test_no_prediction_prints_one_line(
+    line_items: list[LineItem] | None,
+    shown: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    expected = Invoice(line_items=[line("Widget", "10.00"), line("Bolts", "3.00")])
+
+    assert printed_lines(Invoice(line_items=line_items), expected, capsys) == [
+        f"{INDENT}lines: no prediction ({shown}), 2 labelled unpaired"
+    ]
+
+
+def test_a_null_label_prints_skipped(capsys: pytest.CaptureFixture[str]) -> None:
+    predicted = Invoice(line_items=[line("Widget", "10.00")])
+
+    assert printed_lines(predicted, Invoice(), capsys) == [
+        f"{INDENT}lines: skipped, label null"
+    ]
+
+
+def test_line_summary_block() -> None:
+    score = LineDatasetScore(
+        invoice_count=2,
+        skipped_count=1,
+        per_field={
+            "description": Counter({Outcome.CORRECT: 3, Outcome.WRONG: 1}),
+            "quantity": Counter({Outcome.CORRECT: 2, Outcome.MISSING: 2}),
+            "unit_price": Counter({Outcome.CORRECT: 4}),
+            "line_total": Counter({Outcome.CORRECT: 3, Outcome.WRONG: 1}),
+        },
+        overall=Counter({Outcome.CORRECT: 12, Outcome.MISSING: 2, Outcome.WRONG: 2}),
+        invented=1,
+        unpaired_labels=1,
+        largest_name="a_big",
+        largest_labelled=3,
+        overall_without_largest=Counter({Outcome.CORRECT: 4}),
+    )
+
+    assert format_line_summary(score) == [
+        "line items",
+        "lines overall   correct 12  missing 2  wrong 2",
+        "description     correct 3  missing 0  wrong 1",
+        "quantity        correct 2  missing 2  wrong 0",
+        "unit_price      correct 4  missing 0  wrong 0",
+        "line_total      correct 3  missing 0  wrong 1",
+        "invented 1",
+        "labelled unpaired 1",
+        "largest invoice: a_big, 3 labelled rows",
+        "lines excl. top correct 4  missing 0  wrong 0",
+        "skipped 1 invoices (label null)",
+    ]
+
+
+def test_a_line_summary_with_nothing_scored_names_no_largest_invoice() -> None:
+    summary = format_line_summary(LineDatasetScore(skipped_count=2))
+
+    assert "largest invoice: none" in summary
+    assert not any(text.startswith("lines excl. top") for text in summary)
+    assert summary[-1] == "skipped 2 invoices (label null)"
+
+
+def test_llm_score_prints_lines_per_invoice_and_the_block_before_time(
+    sample_tree: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["score", "--extractor", "llm"], extractors=fake_llm(lambda _: Invoice()))
+
+    printed = capsys.readouterr().out.splitlines()
+    # de and r_test have 4 labelled rows each, 0129 has 5.
+    four_unpaired = f"{INDENT}lines: no prediction (None), 4 labelled unpaired"
+    assert printed.count(four_unpaired) == 2
+    assert f"{INDENT}lines: no prediction (None), 5 labelled unpaired" in printed
+    block = printed.index("line items")
+    assert printed[block - 1] == ""  # a blank line, like the header block
+    # 13 rows x 4 fields, all missing.
+    assert printed[block + 1] == "lines overall   correct 0  missing 52  wrong 0"
+    time_line = next(i for i, text in enumerate(printed) if text.startswith("time"))
+    meter_line = next(i for i, text in enumerate(printed) if text.startswith("llm"))
+    assert block < time_line < meter_line

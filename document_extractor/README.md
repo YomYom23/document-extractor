@@ -40,6 +40,7 @@ there; the old log, with live runs and diagnoses, is
   with `extract <pdf>` and `score --set dev|heldout`, each taking
   `--extractor rules|rules-jev|llm`. `CallMeter`, `metered_ask` and
   `metered_llm` count billed calls and tokens; `format_meter` prints them.
+  `print_line_result` and `format_line_summary` print the line block.
 
 ## Invariants
 
@@ -55,8 +56,8 @@ there; the old log, with live runs and diagnoses, is
   `ChoiceAnswer` types), and only `llm_extractor.py` imports OpenAI.
 - Line items are in the schema but not extracted yet: every extractor returns
   `line_items=None`. The scorer pairs and scores line items as a separate
-  block (`score_lines`, D34.5), which `score` does not print yet (D34, not
-  built yet).
+  block (`score_lines`, D34.5). `score --extractor llm` prints it per invoice
+  and after the header counts; rules and rules-jev output is unchanged.
 - Line pairing uses identical totals and identical descriptions only, with
   page order as the tie-break inside a group of equal totals. Every field of
   an unpaired row counts against the run (D34.5).
