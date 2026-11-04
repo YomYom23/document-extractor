@@ -64,9 +64,11 @@ compute a value that is not printed.
   has no item rows, and null only if it has an item table you cannot read.
   - Not lines: rows of the totals block (subtotal, shipping, discount, tax,
     total) and table headers repeated on later pages.
-  - description: everything in the row's description cell as one string with
-    single spaces, joining a description that wraps onto the next line. Leave
-    out item codes, position numbers and units of measure.
+  - description: everything printed in the row's description cell, as one
+    string with single spaces, joining a description that wraps onto the next
+    line. Keep model numbers, sizes, pack counts, percentages and dates that
+    are part of that text. Leave out only what is printed in a column of its
+    own: item or article codes, position numbers and units of measure.
   - quantity and unit_price: as printed, with a dot for decimals, no symbol
     and no thousands separators, at most four decimals.
   - line_total: the row's amount, written like the header amounts. If the row
@@ -94,7 +96,7 @@ class LlmLineItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     description: str | None = Field(
-        description="The row's description as one string, without item codes"
+        description="Everything in the row's description cell, as one string"
     )
     quantity: QuantityText | None = Field(
         description="As printed; for a percentage row, the base amount"
