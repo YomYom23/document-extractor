@@ -13,6 +13,12 @@ above rules + Jev by one wrong value: Jev gave its first wrong currency.
 **Update, NUL repair (D32):** with the reader's text-layer repair, the LLM re-run gives 466 / 0 / 3, and 63 / 0 / 0 on the real invoices. The 4
 Stripe invoice numbers are now right. The 3 left are one garbled text layer and two brand names (D31). Rules are unchanged (see the end of this file).
 
+**Update, line items (D34):** the LLM now returns line items in the same call as the header; the rules extractors do not, so line items
+are compared for the LLM alone. In the final runs it gives 1157 to 1158 of 1160 line fields correct on dev and 709 to 710 of 712 on
+held-out, with 0 missing and every row paired. Every quantity and line total is correct; the 2 or 3 wrong values per run are
+descriptions and, on dev, one percentage row's unit price. The header stays at 266 / 0 / 0 on dev (see "Line items" at the end of this
+file).
+
 **Update, legal-name prompt (D33):** with the vendor-name rule stated in the prompt, the LLM gives 468 correct, 1 missing, 0 wrong
 (see "After the legal-name prompt" at the end of this file).
 
@@ -110,7 +116,8 @@ to call. Its answers did not.
 - **Held-out has now been used.** Fixing what it exposed (N5 `18-Mar-2025`, N12 `K`) would tune the rules to it. Any later change needs new
   held-out samples to be measured fairly (D29).
 - **Three runs.** Enough to see that the LLM's answers were stable here, not to estimate how often it is wrong.
-- **Header fields only.** Line items were not extracted or scored (D34, not built yet).
+- **Line items for the LLM only, on public invoices.** The rules extractors do not extract line items (D34.1), and the 9 private
+  invoices have no line labels yet, so they are skipped in the line block (see "Line items").
 
 ## Wider set (D30), 2026-10-19
 
@@ -196,3 +203,116 @@ never for address parts (D33). LLM re-run, one run, both sets: 67 billed calls, 
 - `…(Pty) LtTdAX` came back as `…(Pty) Ltd`, though the text layer did not change; one run cannot say whether the prompt or variation did it.
 - New missing value: `c_0108653`'s currency is null (was USD, correct): a Mexican seller billing a US customer in `$`, the case Jev got wrong.
   The currency instruction did not change, and null is what it asks for when the page is unclear. One run cannot attribute it.
+
+## Line items (D34)
+
+The runs of the D34.8 loop: header baseline, baseline line run, fix rounds and final runs.
+
+### Header baseline, 2026-11-03
+
+Commit `2c7049b`, before any line-item code. Three LLM dev runs (D34.8.1), 38 invoices each, 0 failed extractions in every run.
+
+| Run | Correct | Missing | Wrong | Calls | Input + output tokens | Cost |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 266 | 0 | 0 | 38 | 40,897 + 3,136 | $0.005658 |
+| 2 | 266 | 0 | 0 | 38 | 40,897 + 3,175 | $0.005677 |
+| 3 | 266 | 0 | 0 | 38 | 40,897 + 3,168 | $0.005674 |
+
+Guard values: header wrong 0, header missing 0. Every header field was correct in all three runs, including `c_0108653`'s currency, which
+was null in the D33 run. A later run with any header wrong or missing value is over the guard.
+
+### Baseline line run, 2026-11-03
+
+Commit `21167f1`, the first full line-item prompt (D34.8.2). One LLM dev run, 38 invoices, 0 failed extractions.
+
+```text
+overall         correct 265  missing 1  wrong 0
+line items
+lines overall   correct 1146  missing 0  wrong 14
+description     correct 276  missing 0  wrong 14
+quantity        correct 290  missing 0  wrong 0
+unit_price      correct 290  missing 0  wrong 0
+line_total      correct 290  missing 0  wrong 0
+invented 0
+labelled unpaired 0
+largest invoice: a_multipage-8p-na-10, 110 labelled rows
+lines excl. top correct 706  missing 0  wrong 14
+skipped 2 invoices (label null)
+llm             38 replies, 59935 input + 18197 output tokens, $0.015092 at gpt-6-luna prices (cached input not discounted)
+```
+
+- Header: missing 1 is over the guard value 0: `c_0108653`'s currency is null again, as in the D33 run. Under D34.8.2 the first fix
+  round addresses the header.
+- Lines: all 290 labelled rows paired by total, none invented. Every number is correct; all 14 wrong values are descriptions, each with
+  text dropped that the label keeps: model or part numbers 6 (all `c_0073141`), sizes and pack counts 5 (`1/2in` twice, `(4)`,
+  `(pack 12)`, `(box 50)`), a unit phrase 1 (`, per metre`), a percentage 1 and a date 1. The prompt's "leave out item codes ... and units of measure" was read as
+  covering text inside the description cell.
+- Output tokens rose from about 3,150 to 18,197 for the set; no reply was cut off at the 16,000 cap.
+
+### Fix round 1, 2026-11-03 (kept)
+
+Before the round, D34.8.3 was amended (commit `8c74c4f`, owner decision): a null currency on `c_0108653` no longer counts against the
+header missing guard; a wrong one still does. Round 1, commit `da106bb`, rewrote the prompt's description rule: keep model numbers,
+sizes, pack counts, percentages and dates that are part of the description, and leave out only codes, position numbers and units printed
+in a column of their own. One LLM dev run, 38 invoices, 0 failed extractions.
+
+```text
+overall         correct 265  missing 1  wrong 0
+line items
+lines overall   correct 1159  missing 0  wrong 1
+description     correct 289  missing 0  wrong 1
+quantity        correct 290  missing 0  wrong 0
+unit_price      correct 290  missing 0  wrong 0
+line_total      correct 290  missing 0  wrong 0
+invented 0
+labelled unpaired 0
+largest invoice: a_multipage-8p-na-10, 110 labelled rows
+lines excl. top correct 719  missing 0  wrong 1
+skipped 2 invoices (label null)
+llm             38 replies, 61379 input + 19211 output tokens, $0.015743 at gpt-6-luna prices (cached input not discounted)
+```
+
+- Progress: line wrong + missing fell from 14 to 1 and line wrong did not rise, so the round is kept.
+- Header: the one missing value is `c_0108653`'s currency, which the guard leaves out, so the header is within its guard (0 wrong,
+  0 missing).
+- The remaining wrong value is `c_0073610` row 7: a date printed on the line below the row, which the label joins to the description.
+
+The loop ended after round 1 (owner decision, 2026-11-03): the prompt already asks for wrapped descriptions to be joined, so a second
+round could only tune it to one row. The frozen commit for the final runs (D34.8.4) is the commit that adds this record.
+
+### Final runs, 2026-11-03
+
+Frozen commit `0c478bc`, clean tree. Three LLM dev runs, then three held-out runs (D34.8.4, D29.4). 0 failed extractions and no cut-off
+in all six; every labelled row paired by total in every run, none invented.
+
+| Run | Header correct / missing / wrong | Lines correct / missing / wrong | Wrong by field | Output tokens | Cost |
+| --- | --- | --- | --- | --- | --- |
+| dev 1 | 266 / 0 / 0 | 1157 / 0 / 3 | description 2, unit_price 1 | 19,395 | $0.015835 |
+| dev 2 | 266 / 0 / 0 | 1157 / 0 / 3 | description 2, unit_price 1 | 17,354 | $0.014815 |
+| dev 3 | 266 / 0 / 0 | 1158 / 0 / 2 | description 1, unit_price 1 | 18,984 | $0.015630 |
+| held-out 1 | 203 / 0 / 0 | 710 / 0 / 2 | description 2 | 11,801 | $0.010478 |
+| held-out 2 | 203 / 0 / 0 | 710 / 0 / 2 | description 2 | 13,017 | $0.011086 |
+| held-out 3 | 202 / 0 / 1 | 709 / 0 / 3 | description 3 | 12,596 | $0.010875 |
+
+Dev: 38 invoices, 290 labelled rows (1,160 line fields), 2 private invoices skipped (no line labels). Held-out: 29 invoices, 178 rows
+(712 line fields), 7 private invoices skipped. Input tokens per run: 61,379 dev, 45,774 held-out. The six runs cost $0.078719.
+
+- The prompt was tuned on dev only (one fix round), so held-out could be expected to do worse; on line fields it did about as well
+  (2 to 3 wrong of 712 against 2 to 3 of 1,160).
+- Spread: dev line wrong 2 to 3, held-out 2 to 3; line missing 0 in all six. The header is 266 / 0 / 0 in every dev run, as in the
+  header baseline; `c_0108653`'s currency came back correct in all three.
+- Every quantity and line total is correct in all six runs, and every held-out unit price.
+
+Remaining failures by cause, all on public invoices (private invoices have no line labels, so none are scored):
+
+- Wrapped code tail joined to the description (dev, 1 row in runs 1 and 2, a different invoice each time): the item code wraps onto
+  the next line (`SUB-BLD-GREENR` / `OOF`), and the model adds the orphan fragment to the description. It is the other side of round 1's
+  "join a description that wraps" rule.
+- Wrapped date not joined (dev, every run): `c_0073610` row 7, as in round 1.
+- Percentage rate as `unit_price` (dev, 1 row per run, a different invoice each time): on a percentage row the model gave the printed
+  rate (22.50, 1.80, 1.25) where the label and the prompt have null.
+- Stray characters in a description (held-out, every run): `c_0084928` rows 3 and 4 gain a one-character fragment (`8`, `E`) inside
+  the description. The held-out PDFs were not opened to confirm a cause (D6).
+- Unit kept in the description (held-out run 3): `c_0040087` row 13 kept a quantity and unit (`4 pcs`).
+- Header (held-out run 3): `a_currency-multi-line-nad`'s `vendor_name` came back with characters of the page's `TAX INVOICE` title mixed
+  into its last word; correct in runs 1 and 2.
