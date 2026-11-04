@@ -211,9 +211,25 @@ pairing is always the pairing that was scored.
     least one dev invoice that shows it. A convention with no dev example is
     left out of the prompt; step 5.3 lists them and D34 records them as not
     prompted.
-*   **Token cap.** `max_output_tokens` = min(16,000, `gpt-6-luna`'s
-    documented maximum output tokens). The number is confirmed at the start
-    of step 5 and written into this design and D34.7 before the step 5 tests.
+
+    Step 5.3 result (2026-11-03, dev page text and labels only):
+
+    | Convention | Dev invoices that show it | Prompted |
+    | --- | --- | --- |
+    | Totals-block rows (shipping, discount, tax) are not lines (D34.2) | `a_clean-us-with-shipping`, `a_clean-us-trade-discount`, `c_0073141_000332` | yes |
+    | Repeated headers are not lines; page order across pages (D34.2) | `a_multipage-2p-us-2`, `a_multipage-8p-na-10` | yes |
+    | Discount printed under an item (D34.2) | none | no |
+    | Carried-forward and page-subtotal rows (D34.2) | none | no |
+    | Wrapped description joined (D34.3) | `c_0026691_201800431` | yes |
+    | Item codes and units of measure left out (D34.3) | `c_0026691_201800431`, `c_0073141_000332` | yes |
+    | Several amounts: `line_total` before tax (D34.3) | none | no |
+    | Row discount: printed rate, amount after discount (D34.3) | `c_0026691_201800431`, `c_0073141_000332` | yes |
+    | Zero-amount rows are lines (D34.3) | none | no |
+    | Percentage row (D34.4) | `a_freight-carrier-za-3`, `a_tax-percentage-line-1`, `a_tax-percentage-line-2` | yes |
+    | Foreign-currency row (D34.4) | `a_currency-multi-line-zar` | yes |
+*   **Token cap.** `max_output_tokens` = 16,000: min(16,000, `gpt-6-luna`'s
+    documented maximum of 128,000 output tokens, checked 2026-11-03 on
+    OpenAI's model page). Written into D34.7.
 *   **Cut-off replies.** Today a reply cut off mid-JSON fails validation
     inside `responses.parse()` and is reported as "reply did not fit the
     schema", and its tokens are not metered (`metered_llm` counts a call only

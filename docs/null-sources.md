@@ -12,9 +12,11 @@ first run on 2026-10-19 ([held-out run](decisions-history.md#held-out-run-2026-1
 ## Whole invoice
 
 ### N1. LLM call fails (`llm_extractor.py`, `LlmExtractor.extract_from_text`)
-- Fields: all seven. Raises `LlmExtractionError`. `document-extractor score` scores it as an empty `Invoice()` and counts it under "failed
-  extractions"; `document-extractor extract` prints an error and exits 1 instead of printing nulls (D28).
-- Triggers: any OpenAI `APIError` (timeout, connection, 4xx, 5xx), a reply cut off at `max_output_tokens`, a refusal, a reply that fails `LlmInvoice` validation.
+- Fields: all seven, and `line_items`. Raises `LlmExtractionError`. `document-extractor score` scores it as an empty `Invoice()` and counts it
+  under "failed extractions"; `document-extractor extract` prints an error and exits 1 instead of printing nulls (D28).
+- Triggers: any OpenAI `APIError` (timeout, connection, 4xx, 5xx), a reply cut off (`reply cut off: max_output_tokens` or `content_filter`,
+  read from the status before the JSON, and metered), a refusal, a complete reply that fails `LlmInvoice` validation. Partial JSON is never
+  used (D34.7).
 - Why null: a failed call has no answer to use, and filling in values would be a guess (D26).
 - Dev cost: 0 failed calls in [live runs 1](decisions-history.md#live-run-1-2026-10-17-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only) and [2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only).
 
@@ -24,8 +26,8 @@ first run on 2026-10-19 ([held-out run](decisions-history.md#held-out-run-2026-1
 
 ## Line items
 
-### N3. `line_items` always null (`rules_extractor.extract`, `llm_extractor.to_invoice`)
-- Why null: the rules extractor never extracts line items; the LLM will, once D34 is built; until then line items are not scored (D34).
+### N3. `line_items` always null in the rules extractors (`rules_extractor.extract`, `extract_with_currency_resolver`)
+- Why null: the rules extractors never extract line items; they are the baseline, and `score` prints the line block for the LLM only (D34.1).
 
 ## Rules extractor (`rules_extractor.py`)
 
@@ -101,6 +103,9 @@ Runs only after N10 to N12 have left the currency `null`. Each path below keeps 
 ### N18. The model returns null
 - The prompt asks for `null` when: the field is not printed; the date's day/month order cannot be told; the currency is unclear from symbol and addresses;
   no separate tax amount is printed. The model can also return `null` for reasons it does not state.
+- Line items: `line_items` is null when the page has an item table the model cannot read (`[]` means no item rows). In a row,
+  `unit_price` is null on a percentage row, `quantity` and `unit_price` are null on a row converted from another currency, and any row
+  field is null when not printed (D34.4).
 - Dev cost: 0 in [live run 2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only).
 
 ### N19. Partial date (`issue_date_from_parts`)
