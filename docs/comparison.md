@@ -13,6 +13,12 @@ above rules + Jev by one wrong value: Jev gave its first wrong currency.
 **Update, NUL repair (D32):** with the reader's text-layer repair, the LLM re-run gives 466 / 0 / 3, and 63 / 0 / 0 on the real invoices. The 4
 Stripe invoice numbers are now right. The 3 left are one garbled text layer and two brand names (D31). Rules are unchanged (see the end of this file).
 
+**Update, line items (D34):** the LLM now returns line items in the same call as the header; the rules extractors do not, so line items
+are compared for the LLM alone. In the final runs it gives 1157 to 1158 of 1160 line fields correct on dev and 709 to 710 of 712 on
+held-out, with 0 missing and every row paired. Every quantity and line total is correct; the 2 or 3 wrong values per run are
+descriptions and, on dev, one percentage row's unit price. The header stays at 266 / 0 / 0 on dev (see "Line items" at the end of this
+file).
+
 **Update, legal-name prompt (D33):** with the vendor-name rule stated in the prompt, the LLM gives 468 correct, 1 missing, 0 wrong
 (see "After the legal-name prompt" at the end of this file).
 
@@ -110,7 +116,8 @@ to call. Its answers did not.
 - **Held-out has now been used.** Fixing what it exposed (N5 `18-Mar-2025`, N12 `K`) would tune the rules to it. Any later change needs new
   held-out samples to be measured fairly (D29).
 - **Three runs.** Enough to see that the LLM's answers were stable here, not to estimate how often it is wrong.
-- **Header fields only.** Line items were not extracted or scored (D34, not built yet).
+- **Line items for the LLM only, on public invoices.** The rules extractors do not extract line items (D34.1), and the 9 private
+  invoices have no line labels yet, so they are skipped in the line block (see "Line items").
 
 ## Wider set (D30), 2026-10-19
 
@@ -290,11 +297,13 @@ in all six; every labelled row paired by total in every run, none invented.
 Dev: 38 invoices, 290 labelled rows (1,160 line fields), 2 private invoices skipped (no line labels). Held-out: 29 invoices, 178 rows
 (712 line fields), 7 private invoices skipped. Input tokens per run: 61,379 dev, 45,774 held-out. The six runs cost $0.078719.
 
+- The prompt was tuned on dev only (one fix round), so held-out could be expected to do worse; on line fields it did about as well
+  (2 to 3 wrong of 712 against 2 to 3 of 1,160).
 - Spread: dev line wrong 2 to 3, held-out 2 to 3; line missing 0 in all six. The header is 266 / 0 / 0 in every dev run, as in the
   header baseline; `c_0108653`'s currency came back correct in all three.
 - Every quantity and line total is correct in all six runs, and every held-out unit price.
 
-Remaining failures by cause:
+Remaining failures by cause, all on public invoices (private invoices have no line labels, so none are scored):
 
 - Wrapped code tail joined to the description (dev, 1 row in runs 1 and 2, a different invoice each time): the item code wraps onto
   the next line (`SUB-BLD-GREENR` / `OOF`), and the model adds the orphan fragment to the description. It is the other side of round 1's
