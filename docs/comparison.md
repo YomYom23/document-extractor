@@ -241,3 +241,34 @@ llm             38 replies, 59935 input + 18197 output tokens, $0.015092 at gpt-
   `(pack 12)`, `(box 50)`), a unit phrase 1 (`, per metre`), a percentage 1 and a date 1. The prompt's "leave out item codes ... and units of measure" was read as
   covering text inside the description cell.
 - Output tokens rose from about 3,150 to 18,197 for the set; no reply was cut off at the 16,000 cap.
+
+### Fix round 1, 2026-11-03 (kept)
+
+Before the round, D34.8.3 was amended (commit `8c74c4f`, owner decision): a null currency on `c_0108653` no longer counts against the
+header missing guard; a wrong one still does. Round 1, commit `da106bb`, rewrote the prompt's description rule: keep model numbers,
+sizes, pack counts, percentages and dates that are part of the description, and leave out only codes, position numbers and units printed
+in a column of their own. One LLM dev run, 38 invoices, 0 failed extractions.
+
+```text
+overall         correct 265  missing 1  wrong 0
+line items
+lines overall   correct 1159  missing 0  wrong 1
+description     correct 289  missing 0  wrong 1
+quantity        correct 290  missing 0  wrong 0
+unit_price      correct 290  missing 0  wrong 0
+line_total      correct 290  missing 0  wrong 0
+invented 0
+labelled unpaired 0
+largest invoice: a_multipage-8p-na-10, 110 labelled rows
+lines excl. top correct 719  missing 0  wrong 1
+skipped 2 invoices (label null)
+llm             38 replies, 61379 input + 19211 output tokens, $0.015743 at gpt-6-luna prices (cached input not discounted)
+```
+
+- Progress: line wrong + missing fell from 14 to 1 and line wrong did not rise, so the round is kept.
+- Header: the one missing value is `c_0108653`'s currency, which the guard leaves out, so the header is within its guard (0 wrong,
+  0 missing).
+- The remaining wrong value is `c_0073610` row 7: a date printed on the line below the row, which the label joins to the description.
+
+The loop ended after round 1 (owner decision, 2026-11-03): the prompt already asks for wrapped descriptions to be joined, so a second
+round could only tune it to one row. The frozen commit for the final runs (D34.8.4) is the commit that adds this record.
