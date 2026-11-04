@@ -178,7 +178,7 @@ def main(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="document-extractor",
-        description="Extract header fields from digital PDF invoices.",
+        description="Extract header fields and line items from digital PDF invoices.",
     )
     # required=True: running with no command prints usage instead of nothing.
     commands = parser.add_subparsers(dest="command", required=True)

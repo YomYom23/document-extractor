@@ -3,7 +3,7 @@
 ## System Overview
 
 A learning and portfolio project (D1) that extracts structured header fields
-from digital PDF invoices (D2) into one fixed schema (D3), and measures how
+and line items from digital PDF invoices (D2) into one fixed schema (D3), and measures how
 well each approach does against hand-labelled samples (D6). Three extractors
 are compared on the same inputs: hand-written rules, rules plus a Jev currency
 resolver, and an OpenAI model. Use it from the command line (D7):
@@ -37,8 +37,8 @@ uv run --env-file .env document-extractor score --set dev --extractor llm
 
 - Every extractor has the signature `extract(pdf_path) -> Invoice`.
 - Missing is `null`, never a guess; money is `Decimal`.
-- Only the LLM extracts line items (D34); they are scored as a separate block
-  and their billed dev runs are not done yet.
+- The LLM extracts line items; the rules extractors do not (D34). Line items
+  are scored as a separate block.
 - The held-out set is for the final comparison only. Its text never shapes a
   rule or a prompt.
 - Each change ends with pytest, ruff and mypy all clean (D13).

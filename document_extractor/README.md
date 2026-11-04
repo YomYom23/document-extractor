@@ -62,6 +62,8 @@ there; the old log, with live runs and diagnoses, is
 - Line pairing uses identical totals and identical descriptions only, with
   page order as the tie-break inside a group of equal totals. Every field of
   an unpaired row counts against the run (D34.5).
+- `score` prints exactly the pairing it scored: `print_line_result` and the
+  line block both come from `score_lines`, never a second pairing.
 - The rules extractor never calls a model. The resolver never overrides a
   currency the rules found, and only runs when the page has a bare `$` (D25).
 - A Jev failure leaves the currency `None`. An LLM failure raises

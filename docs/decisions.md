@@ -362,7 +362,7 @@ printed otherwise, and never address parts. Its example suffixes are generic (Lt
 **Changes:** D9, D12, D26, D29
 **Not prompted:** conventions with no dev example stay out of the prompt (D6): a discount printed under an item, carried-forward and
 page-subtotal rows, the before-tax amount on a row with several amounts, and zero-amount rows. Their labels still follow 2 and 3.
-**Not built yet:** all 58 public invoices have line-item labels (the 25 IEB and 20 Sinabis invoices were labelled last); the 9 private ones
-are deferred. Extraction, scoring and the `score` line block are built; the billed runs from 8.2 on are not done.
+**Deferred:** line-item labels for the 9 private invoices; until they exist, those invoices are skipped in the line block.
 **Evidence:** [decisions-history.md](decisions-history.md), D34; [designs/line-items-brief.md](designs/line-items-brief.md);
-[designs/line-items.md](designs/line-items.md).
+[designs/line-items.md](designs/line-items.md); [comparison.md](comparison.md) ("Line items": header baseline, baseline line run, fix
+round 1, final runs).
