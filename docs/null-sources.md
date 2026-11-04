@@ -5,8 +5,9 @@ looked at later for a fix. A `null` is always on purpose (D11: wrong is worse th
 
 Rule (D27): any new code path that can produce a `null` gets an entry here in the same commit.
 
-"Dev cost" is measured on the 9 dev invoices. Rules extractor numbers are from a free run on 2026-10-19 (56 correct, 7 missing, 0 wrong);
-LLM numbers are from D26 live run 2. Held-out has never been run (D6).
+"Dev cost" is measured on the 9 dev invoices of 2026-10-19: rules extractor numbers from a free run that day (56 correct, 7 missing, 0 wrong),
+LLM numbers from [D26 live run 2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only). Current results for all 67 invoices are in [comparison.md](comparison.md). Held-out was
+first run on 2026-10-19 ([held-out run](decisions-history.md#held-out-run-2026-10-19-first-run-of-any-extractor-on-held-out-4-billed-openai-calls-0-jev-calls), D28).
 
 ## Whole invoice
 
@@ -15,7 +16,7 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
   extractions"; `document-extractor extract` prints an error and exits 1 instead of printing nulls (D28).
 - Triggers: any OpenAI `APIError` (timeout, connection, 4xx, 5xx), a reply cut off at `max_output_tokens`, a refusal, a reply that fails `LlmInvoice` validation.
 - Why null: a failed call has no answer to use, and filling in values would be a guess (D26).
-- Dev cost: 0 failed calls in live runs 1 and 2.
+- Dev cost: 0 failed calls in [live runs 1](decisions-history.md#live-run-1-2026-10-17-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only) and [2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only).
 
 ### N2. No text layer (`pdf_reader.py`, `read_pdf`)
 - Fields: none in `extract`, which prints an error and exits 1. All seven in `score`, which scores the invoice as an empty `Invoice()` and counts
@@ -24,7 +25,7 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 ## Line items
 
 ### N3. `line_items` always null (`rules_extractor.extract`, `llm_extractor.to_invoice`)
-- Why null: not extracted yet; header fields come first and line items are not scored (D12, D24, D26).
+- Why null: the rules extractor never extracts line items; the LLM will, once D34 is built; until then line items are not scored (D34).
 
 ## Rules extractor (`rules_extractor.py`)
 
@@ -43,11 +44,11 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 ### N6. Ambiguous slash date (`parse_date`)
 - `09/03/2026`: both parts are 12 or under, so it is 9 March (most countries) or 3 September (US). Returns `null`.
 - Why: the order cannot be told from the date alone; guessing could be wrong (D11). Open problem in D24, with candidate fixes listed there.
-- Dev cost: 2 (`a_clean-fr-right-header`, `a_clean-us-clean-simple`). The LLM read both correctly in live run 2.
+- Dev cost: 2 (`a_clean-fr-right-header`, `a_clean-us-clean-simple`). The LLM read both correctly in [live run 2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only).
 
 ### N7. Amount label not at the start of a segment (`find_labelled_amount`)
 - Fields: subtotal, tax, total. A label inside a sentence ("The subtotal including VAT is EUR 196,147.20") is not used.
-- Why: matching anywhere in a line read that sentence as the tax too, a wrong value (D24, Q26).
+- Why: matching anywhere in a line read that sentence as the tax too, a wrong value (D24).
 - Dev cost: 2 (`b_INV-2026-0129` subtotal and total). The LLM read both from the sentences.
 
 ### N8. Tax label not in the list (`TAX_LABEL`)
@@ -65,7 +66,7 @@ LLM numbers are from D26 live run 2. Held-out has never been run (D6).
 
 ### N11. Bare `$` (`detect_currency`)
 - `$` is USD, CAD, AUD, NZD, NAD, MXN, ... so the rules return `null` and the Jev resolver (D25) gets a chance.
-- Dev cost for rules alone: 2 (`a_clean-us-clean-simple`, `a_currency-nad-bare-dollar`). Jev resolved both in the D25 live run.
+- Dev cost for rules alone: 2 (`a_clean-us-clean-simple`, `a_currency-nad-bare-dollar`). Jev resolved both in the [D25 live run](decisions-history.md#live-run-2026-10-17-uv-run-python--m-scriptslive_currency_check-13-billed-jev-calls).
 
 ### N12. Currency not recognised (`detect_currency`)
 - Only these codes count when printed: EUR, USD, GBP, ZAR, CHF, CAD, AUD, NZD, JPY, SEK, NOK, DKK. Only these symbols: `€`, `£`, `R` before a digit.
@@ -83,14 +84,14 @@ Runs only after N10 to N12 have left the currency `null`. Each path below keeps 
 
 ### N14. No `$` straight before a number (`resolve_currency`, `DOLLAR_AMOUNT`)
 - The resolver skips the invoice. `12,00 $` (symbol after the amount, as in French Canadian invoices) does not match, so it stays `null`.
-- Why: Jev is asked only about the bare-dollar problem; other lost currencies are a total-finding problem (D25, Q32).
+- Why: Jev is asked only about the bare-dollar problem; other lost currencies are a total-finding problem (D25).
 
 ### N15. Jev call fails (`Jev.ask` raises `JevError`)
 - Any `TypeSafeError`, or a reply missing the `Choice` answer.
 - Why: an outage shows up as a missing field, never a crash or a guess (D25).
 
 ### N16. Jev says `unclear` or is under 0.8 confident (`currency_from_answer`)
-- Why: the threshold set from the D25 live run. At 0.8 one of 13 cases (US seller, Canadian customer, 0.73) stayed `null`.
+- Why: the threshold set from the [D25 live run](decisions-history.md#live-run-2026-10-17-uv-run-python--m-scriptslive_currency_check-13-billed-jev-calls). At 0.8 one of 13 cases (US seller, Canadian customer, 0.73) stayed `null`.
 
 ### N17. Currency outside Jev's list
 - Jev can only answer USD, CAD, AUD, NZD, SGD, HKD, NAD, MXN or `unclear`. Any other `$` currency (TWD, BRL `R$`, ...) can at best be `unclear`.
@@ -100,11 +101,11 @@ Runs only after N10 to N12 have left the currency `null`. Each path below keeps 
 ### N18. The model returns null
 - The prompt asks for `null` when: the field is not printed; the date's day/month order cannot be told; the currency is unclear from symbol and addresses;
   no separate tax amount is printed. The model can also return `null` for reasons it does not state.
-- Dev cost: 0 in live run 2.
+- Dev cost: 0 in [live run 2](decisions-history.md#live-run-2-2026-10-19-after-q47-uv-run-python--m-scriptslive_llm_check-9-billed-calls-dev-only).
 
 ### N19. Partial date (`issue_date_from_parts`)
-- Any of `issue_year`, `issue_month`, `issue_day` null gives a `null` date; a missing part is never filled in (D26, Q47).
+- Any of `issue_year`, `issue_month`, `issue_day` null gives a `null` date; a missing part is never filled in (D26).
 
 ### N20. Impossible date (`issue_date_from_parts`)
-- Month 30, 30 February, day 0: `date()` raises, the date becomes `null` and the other fields are kept (D26, Q47).
-- Dev cost: 0 since Q47. Before Q47 the one-string date was wrong, not null, on all 9.
+- Month 30, 30 February, day 0: `date()` raises, the date becomes `null` and the other fields are kept (D26).
+- Dev cost: 0 since the D26 date change. Before it the one-string date was wrong, not null, on all 9.

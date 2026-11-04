@@ -6,5 +6,18 @@
   "subtotal": "1268.00",
   "tax": "90.35",
   "total": "1294.95",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Heavy-duty storage bins, 27-gal (case of 4)",
+      "quantity": "5",
+      "unit_price": "82.00",
+      "line_total": "410.00"
+    },
+    {
+      "description": "Industrial shelving unit, 72-inch",
+      "quantity": "2",
+      "unit_price": "429.00",
+      "line_total": "858.00"
+    }
+  ]
 }

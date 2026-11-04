@@ -186,7 +186,7 @@ def find_labelled_value(lines: list[Line], label: re.Pattern[str]) -> str | None
 
 # --- Labelled amounts -------------------------------------------------------
 
-# Must START a segment (D24, Q26). Anywhere in a line would read 0129's
+# Must START a segment (D24). Anywhere in a line would read 0129's
 # "The subtotal including VAT is EUR 196,147.20" as the tax too.
 # `\b` ends the label at a word boundary, so "Totals" is not "Total"; and
 # since the label must start the segment, "Subtotal" never matches "total".
@@ -310,5 +310,5 @@ def extract(pdf_path: Path) -> Invoice:
         subtotal=subtotal.amount if subtotal else None,
         tax=tax.amount if tax else None,
         total=total.amount if total else None,
-        line_items=None,  # not extracted yet (D24)
+        line_items=None,  # D34: the rules extractor never extracts line items
     )

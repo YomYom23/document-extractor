@@ -33,7 +33,7 @@ def label_for(pdf_path: Path) -> Invoice:
 
 
 def fake_llm(extract: Extract) -> Mapping[str, Extract]:
-    """The extractors mapping with a fake in the `llm` slot (D28, Q56)."""
+    """The extractors mapping with a fake in the `llm` slot (D28)."""
     return {"llm": extract}
 
 
@@ -50,7 +50,7 @@ def raising(error: Exception) -> Extract:
 def test_extract_prints_the_invoice_as_json(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    exit_code = main(["extract", str(GERMAN_PDF)])  # default: rules (Q51)
+    exit_code = main(["extract", str(GERMAN_PDF)])  # default: rules (D28)
 
     printed = capsys.readouterr()
     assert exit_code == 0
@@ -90,7 +90,7 @@ def test_a_failed_extraction_is_an_error_not_an_empty_invoice(
 
     printed = capsys.readouterr()
     assert exit_code == 1
-    assert printed.out == ""  # no all-null JSON stands in for a failure (Q53)
+    assert printed.out == ""  # no all-null JSON stands in for a failure (D28)
     assert str(error) in printed.err
 
 
@@ -133,7 +133,7 @@ def sample_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         ("a_clean-de-grid-eu-decimals", tmp_path / "dev"),
         ("b_INV-2026-0129", tmp_path / "dev"),
         # A public sample renamed: a test cannot rely on the git-ignored
-        # real invoices, which a fresh clone does not have (Q75).
+        # real invoices, which a fresh clone does not have (D30).
         ("a_clean-de-grid-eu-decimals", tmp_path / "private" / "dev"),
     ]:
         target.mkdir(parents=True, exist_ok=True)
@@ -150,7 +150,7 @@ def sample_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def test_score_reports_the_rules_extractor(
     sample_tree: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    exit_code = main(["score"])  # defaults: rules on dev (Q51, Q54)
+    exit_code = main(["score"])  # defaults: rules on dev (D28)
 
     printed = capsys.readouterr()
     assert exit_code == 0
@@ -171,7 +171,7 @@ def test_score_includes_the_private_folder_of_the_set(
 
     main(["score", "--extractor", "llm"], extractors=fake_llm(recording))
 
-    # dev and private/dev, never held-out unless named (D6, Q75).
+    # dev and private/dev, never held-out unless named (D6, D30).
     assert sorted(pdf_path.stem for pdf_path in seen) == [
         "a_clean-de-grid-eu-decimals",
         "b_INV-2026-0129",
@@ -185,7 +185,7 @@ def test_score_prints_a_subtotal_per_source(
     main(["score"])
 
     printed = capsys.readouterr().out
-    # One line per source prefix present (Q76): a_ IEB, b_ InvoiceBenchmark, r_ yours.
+    # One line per source prefix present (D30): a_ IEB, b_ InvoiceBenchmark, r_ yours.
     assert "  ieb           correct 7  missing 0  wrong 0" in printed
     assert "  invoicebench  correct 4  missing 3  wrong 0" in printed
     assert "  real          correct 7  missing 0  wrong 0" in printed
@@ -207,7 +207,7 @@ def test_a_failed_extraction_scores_as_missing_and_is_counted(
     assert "overall         correct 1  missing 20  wrong 0" in printed.out
 
 
-# --- call meters: time, tokens and Jev visibility (D29, Q59, Q60) -------------
+# --- call meters: time, tokens and Jev visibility (D29) -------------
 
 
 class FakeJev:

@@ -6,5 +6,12 @@
   "subtotal": "8106.50",
   "tax": "2026.62",
   "total": "10133.12",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Sound Engineer Mixing Fee",
+      "quantity": "15.5",
+      "unit_price": "523.00",
+      "line_total": "8106.50"
+    }
+  ]
 }

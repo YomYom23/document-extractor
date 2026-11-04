@@ -6,5 +6,126 @@
   "subtotal": "12477.32",
   "tax": null,
   "total": "12649.32",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Clay Red Face Bricks",
+      "quantity": "103.8",
+      "unit_price": "12.30",
+      "line_total": "1276.74"
+    },
+    {
+      "description": "Wire Mesh Concrete Reinforcement 50x50",
+      "quantity": "65.7",
+      "unit_price": "4.30",
+      "line_total": "282.51"
+    },
+    {
+      "description": "Dump Truck Delivery Fee",
+      "quantity": "2",
+      "unit_price": "100.00",
+      "line_total": "200.00"
+    },
+    {
+      "description": "Gravel Aggregate 10-20mm",
+      "quantity": "10",
+      "unit_price": "29.60",
+      "line_total": "296.00"
+    },
+    {
+      "description": "Geotextile Fabric Roll",
+      "quantity": "71.7",
+      "unit_price": "3.70",
+      "line_total": "265.29"
+    },
+    {
+      "description": "Paving Sand 25kg",
+      "quantity": "22.1",
+      "unit_price": "4.20",
+      "line_total": "92.82"
+    },
+    {
+      "description": "Tile Adhesive 20kg",
+      "quantity": "26.1",
+      "unit_price": "9.50",
+      "line_total": "247.95"
+    },
+    {
+      "description": "Insulation Foam Board XPS 50mm",
+      "quantity": "126.6",
+      "unit_price": "8.30",
+      "line_total": "1050.78"
+    },
+    {
+      "description": "KestrelStone C25 Ready-Mix Concrete",
+      "quantity": "8.4",
+      "unit_price": "142.00",
+      "line_total": "1192.80"
+    },
+    {
+      "description": "Basalt Grey Standard Bricks",
+      "quantity": "313.2",
+      "unit_price": "12.00",
+      "line_total": "3758.40"
+    },
+    {
+      "description": "Rebar Steel Bar 16mm Grade 60",
+      "quantity": "146",
+      "unit_price": "2.50",
+      "line_total": "365.00"
+    },
+    {
+      "description": "Foundation Inspection Service",
+      "quantity": "1",
+      "unit_price": "173.00",
+      "line_total": "173.00"
+    },
+    {
+      "description": "Toolbox Basic",
+      "quantity": "4",
+      "unit_price": "70.00",
+      "line_total": "280.00"
+    },
+    {
+      "description": "Grout Sanded 5kg Lot 1920-F",
+      "quantity": "34.8",
+      "unit_price": "7.00",
+      "line_total": "243.60"
+    },
+    {
+      "description": "Material Handling Labor Hourly",
+      "quantity": "20.5",
+      "unit_price": "38.90",
+      "line_total": "797.45"
+    },
+    {
+      "description": "Damp Proof Membrane 1000 Gauge",
+      "quantity": "82.3",
+      "unit_price": "5.50",
+      "line_total": "452.65"
+    },
+    {
+      "description": "Rebar Steel Bar 12mm Grade 60 Lot 4531-G",
+      "quantity": "266.3",
+      "unit_price": "2.10",
+      "line_total": "559.23"
+    },
+    {
+      "description": "Silica Sand (Washed, Fine)",
+      "quantity": "4",
+      "unit_price": "21.40",
+      "line_total": "85.60"
+    },
+    {
+      "description": "Safety Helmet",
+      "quantity": "27",
+      "unit_price": "30.30",
+      "line_total": "818.10"
+    },
+    {
+      "description": "Gray River Portland Cement Type II (Sulfate Resistant)",
+      "quantity": "39.4",
+      "unit_price": "1.00",
+      "line_total": "39.40"
+    }
+  ]
 }

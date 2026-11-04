@@ -6,5 +6,24 @@
   "subtotal": "1422.00",
   "tax": "92.43",
   "total": "1599.43",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Pallet jack, 5500 lb capacity",
+      "quantity": "2",
+      "unit_price": "489.00",
+      "line_total": "978.00"
+    },
+    {
+      "description": "Stretch wrap rolls, 18-inch x 1500 ft",
+      "quantity": "12",
+      "unit_price": "24.50",
+      "line_total": "294.00"
+    },
+    {
+      "description": "Warehouse floor tape, yellow, 100 ft",
+      "quantity": "8",
+      "unit_price": "18.75",
+      "line_total": "150.00"
+    }
+  ]
 }

@@ -6,5 +6,54 @@
   "subtotal": "285609.22",
   "tax": "51409.66",
   "total": "337018.88",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Sandpaper Pack (Assorted Grits)",
+      "quantity": "5",
+      "unit_price": "1503.00",
+      "line_total": "7515.00"
+    },
+    {
+      "description": "Painter's Tape (18mm, 60m)",
+      "quantity": "53",
+      "unit_price": "222.84",
+      "line_total": "11810.52"
+    },
+    {
+      "description": "Mastic Paint - Interior Satin (15L)",
+      "quantity": "27",
+      "unit_price": "5017.00",
+      "line_total": "135459.00"
+    },
+    {
+      "description": "Corner Bead (Paper, 2.7m)",
+      "quantity": "46",
+      "unit_price": "230.65",
+      "line_total": "10609.90"
+    },
+    {
+      "description": "High-Gloss Trim Enamel (2.5L)",
+      "quantity": "9",
+      "unit_price": "4152.00",
+      "line_total": "37368.00"
+    },
+    {
+      "description": "Drop Cloth Rental (Daily)",
+      "quantity": "1",
+      "unit_price": "781.00",
+      "line_total": "781.00"
+    },
+    {
+      "description": "Putty Knife (6-inch)",
+      "quantity": "5",
+      "unit_price": "655.00",
+      "line_total": "3275.00"
+    },
+    {
+      "description": "Ceiling Painting (per m2)",
+      "quantity": "50.8",
+      "unit_price": "1551.00",
+      "line_total": "78790.80"
+    }
+  ]
 }

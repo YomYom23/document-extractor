@@ -6,5 +6,66 @@
   "subtotal": "30939.56",
   "tax": null,
   "total": "30939.56",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Travel Fee Surcharge (>15km)",
+      "quantity": "70.6",
+      "unit_price": "0.99",
+      "line_total": "69.89"
+    },
+    {
+      "description": "Earth Rod 1.2m Copper Bonded",
+      "quantity": "2",
+      "unit_price": "11.99",
+      "line_total": "23.98"
+    },
+    {
+      "description": "Portable Generator Rental (Daily)",
+      "quantity": "4",
+      "unit_price": "176.99",
+      "line_total": "707.96"
+    },
+    {
+      "description": "SolarFlex 6mm\u00b2 PV Wire (UV Resistant)",
+      "quantity": "261.7",
+      "unit_price": "1.99",
+      "line_total": "520.78"
+    },
+    {
+      "description": "Commercial LiFePO4 Battery Rack 50kWh",
+      "quantity": "1",
+      "unit_price": "19046.00",
+      "line_total": "19046.00"
+    },
+    {
+      "description": "Lighting Design Consultation",
+      "quantity": "6.5",
+      "unit_price": "66.99",
+      "line_total": "435.43"
+    },
+    {
+      "description": "Thermal Imaging Survey Report 2020-09-15",
+      "quantity": "1",
+      "unit_price": "291.99",
+      "line_total": "291.99"
+    },
+    {
+      "description": "Journeyman Electrician Labour",
+      "quantity": "5.5",
+      "unit_price": "54.99",
+      "line_total": "302.44"
+    },
+    {
+      "description": "Solar Panel Mounting & Wiring",
+      "quantity": "201.1",
+      "unit_price": "40.99",
+      "line_total": "8243.09"
+    },
+    {
+      "description": "Preventative Maintenance Contract (Annual)",
+      "quantity": "1",
+      "unit_price": "1298.00",
+      "line_total": "1298.00"
+    }
+  ]
 }

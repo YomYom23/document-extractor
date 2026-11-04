@@ -6,5 +6,30 @@
   "subtotal": "661742080.00",
   "tax": null,
   "total": "661742080.00",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Steel Reinforcement Bar D16 (16mm)",
+      "quantity": "233.8",
+      "unit_price": "22000.00",
+      "line_total": "5143600.00"
+    },
+    {
+      "description": "Journeyman Mason Labor",
+      "quantity": "25",
+      "unit_price": "1132800.00",
+      "line_total": "28320000.00"
+    },
+    {
+      "description": "Concrete Wall Formwork & Pour",
+      "quantity": "249.3",
+      "unit_price": "2495000.00",
+      "line_total": "622003500.00"
+    },
+    {
+      "description": "Concrete Formwork Tie Rods",
+      "quantity": "982",
+      "unit_price": "6390.00",
+      "line_total": "6274980.00"
+    }
+  ]
 }

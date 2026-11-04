@@ -73,7 +73,7 @@ def test_unclear_stays_null_however_confident() -> None:
 
 def test_a_page_without_a_dollar_amount_is_not_sent() -> None:
     # Currency is null for another reason (0129: no total line). Not this
-    # stage's job (D25, Q32).
+    # stage's job (D25).
     jev = FakeJev("USD", confidence=1.0)
     page = "The total amount due is EUR 196,147.20."
     assert resolve_currency(bare_dollar_invoice(), page, jev.ask).currency is None

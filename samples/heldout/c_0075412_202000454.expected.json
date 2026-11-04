@@ -6,5 +6,30 @@
   "subtotal": "16072.25",
   "tax": "4018.06",
   "total": "20090.31",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Radiant Floor System Pressure Test",
+      "quantity": "1",
+      "unit_price": "2108.00",
+      "line_total": "2108.00"
+    },
+    {
+      "description": "HydroFlow 40mm PEX-A Pipe per Meter",
+      "quantity": "540.7",
+      "unit_price": "18.00",
+      "line_total": "9732.60"
+    },
+    {
+      "description": "Drain Camera Inspection per Hour",
+      "quantity": "1.5",
+      "unit_price": "1454.00",
+      "line_total": "2181.00"
+    },
+    {
+      "description": "Apprentice Plumber Hourly Rate",
+      "quantity": "3.5",
+      "unit_price": "651.00",
+      "line_total": "2050.65"
+    }
+  ]
 }

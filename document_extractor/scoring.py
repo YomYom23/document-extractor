@@ -1,4 +1,9 @@
-"""Compare an extracted invoice to its hand-written label (decisions D11, D12, D21)."""
+"""Compare an extracted invoice to its hand-written label.
+
+Each field is correct, missing or wrong (D21). A null where the label has a value
+is missing, and a value against a null label is wrong (D11). Money, dates and
+invoice number must match exactly; text is compared after normalising (D12).
+"""
 
 from collections import Counter
 from collections.abc import Iterable
@@ -7,7 +12,7 @@ from enum import StrEnum
 
 from document_extractor.schema import Invoice
 
-# Header fields only; line items are scored later (D12).
+# D34: header fields only until line-item scoring is built.
 HEADER_FIELDS = (
     "vendor_name",
     "invoice_number",

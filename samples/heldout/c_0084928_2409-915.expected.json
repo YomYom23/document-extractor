@@ -6,5 +6,30 @@
   "subtotal": "512914.00",
   "tax": null,
   "total": "512914.00",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Drive motor and inverter set for shuttle platform",
+      "quantity": "8",
+      "unit_price": "16719.00",
+      "line_total": "133752.00"
+    },
+    {
+      "description": "Voltmere 60 kWh vehicle battery pack",
+      "quantity": "1",
+      "unit_price": "42992.00",
+      "line_total": "42992.00"
+    },
+    {
+      "description": "Lumora LX-128 solid-state lidar sensor",
+      "quantity": "10",
+      "unit_price": "17179.00",
+      "line_total": "171790.00"
+    },
+    {
+      "description": "Cortexa CX-200 in-vehicle compute module",
+      "quantity": "10",
+      "unit_price": "16438.00",
+      "line_total": "164380.00"
+    }
+  ]
 }

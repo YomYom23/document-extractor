@@ -6,5 +6,42 @@
   "subtotal": "45020.98",
   "tax": "599.98",
   "total": "45620.96",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Shipping line release fee (disbursement)",
+      "quantity": "1",
+      "unit_price": "1424.68",
+      "line_total": "1424.68"
+    },
+    {
+      "description": "Import VAT paid on behalf (disbursement)",
+      "quantity": "1",
+      "unit_price": "34537.65",
+      "line_total": "34537.65"
+    },
+    {
+      "description": "Container storage, 4 days (disbursement)",
+      "quantity": "1",
+      "unit_price": "5058.76",
+      "line_total": "5058.76"
+    },
+    {
+      "description": "Customs clearance fee",
+      "quantity": "1",
+      "unit_price": "2543.31",
+      "line_total": "2543.31"
+    },
+    {
+      "description": "Bill of entry preparation",
+      "quantity": "1",
+      "unit_price": "830.15",
+      "line_total": "830.15"
+    },
+    {
+      "description": "Cargo inspection attendance",
+      "quantity": "1",
+      "unit_price": "626.43",
+      "line_total": "626.43"
+    }
+  ]
 }

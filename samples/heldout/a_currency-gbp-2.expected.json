@@ -6,5 +6,30 @@
   "subtotal": "17884.04",
   "tax": "3576.81",
   "total": "21460.85",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Truck tyre 315/80R22.5 drive",
+      "quantity": "1",
+      "unit_price": "4444.22",
+      "line_total": "4444.22"
+    },
+    {
+      "description": "Angle grinder discs 115mm (10)",
+      "quantity": "3",
+      "unit_price": "157.96",
+      "line_total": "473.88"
+    },
+    {
+      "description": "Toner cartridge, black, high yield",
+      "quantity": "4",
+      "unit_price": "707.76",
+      "line_total": "2831.04"
+    },
+    {
+      "description": "Brake pads, trailer axle set",
+      "quantity": "6",
+      "unit_price": "1689.15",
+      "line_total": "10134.90"
+    }
+  ]
 }
