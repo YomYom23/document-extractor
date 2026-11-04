@@ -213,3 +213,31 @@ Commit `2c7049b`, before any line-item code. Three LLM dev runs (D34.8.1), 38 in
 
 Guard values: header wrong 0, header missing 0. Every header field was correct in all three runs, including `c_0108653`'s currency, which
 was null in the D33 run. A later run with any header wrong or missing value is over the guard.
+
+### Baseline line run, 2026-11-03
+
+Commit `21167f1`, the first full line-item prompt (D34.8.2). One LLM dev run, 38 invoices, 0 failed extractions.
+
+```text
+overall         correct 265  missing 1  wrong 0
+line items
+lines overall   correct 1146  missing 0  wrong 14
+description     correct 276  missing 0  wrong 14
+quantity        correct 290  missing 0  wrong 0
+unit_price      correct 290  missing 0  wrong 0
+line_total      correct 290  missing 0  wrong 0
+invented 0
+labelled unpaired 0
+largest invoice: a_multipage-8p-na-10, 110 labelled rows
+lines excl. top correct 706  missing 0  wrong 14
+skipped 2 invoices (label null)
+llm             38 replies, 59935 input + 18197 output tokens, $0.015092 at gpt-6-luna prices (cached input not discounted)
+```
+
+- Header: missing 1 is over the guard value 0: `c_0108653`'s currency is null again, as in the D33 run. Under D34.8.2 the first fix
+  round addresses the header.
+- Lines: all 290 labelled rows paired by total, none invented. Every number is correct; all 14 wrong values are descriptions, each with
+  text dropped that the label keeps: model or part numbers 6 (all `c_0073141`), sizes and pack counts 5 (`1/2in` twice, `(4)`,
+  `(pack 12)`, `(box 50)`), a unit phrase 1 (`, per metre`), a percentage 1 and a date 1. The prompt's "leave out item codes ... and units of measure" was read as
+  covering text inside the description cell.
+- Output tokens rose from about 3,150 to 18,197 for the set; no reply was cut off at the 16,000 cap.
