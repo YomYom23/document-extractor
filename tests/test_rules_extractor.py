@@ -54,7 +54,7 @@ DEV_DIRECTORY = Path(__file__).parent.parent / "samples" / "dev"
 
 # The 9 dev invoices the rules were written and checked against (D24, D25).
 # Dev has grown since (D30) with invoices the frozen rules have never seen
-# (D29, Q62); their results are measured by `score`, not pinned here.
+# (D29); their results are measured by `score`, not pinned here.
 RULES_DEV_SAMPLES = (
     "a_clean-de-grid-eu-decimals",
     "a_clean-fr-right-header",

@@ -6,5 +6,18 @@
   "subtotal": "15229.15",
   "tax": "2436.66",
   "total": "17665.81",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Office cleaning, monthly contract",
+      "quantity": "1",
+      "unit_price": "6804.32",
+      "line_total": "6804.32"
+    },
+    {
+      "description": "Monthly IT support retainer",
+      "quantity": "1",
+      "unit_price": "8424.83",
+      "line_total": "8424.83"
+    }
+  ]
 }

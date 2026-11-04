@@ -360,11 +360,13 @@ dependencies = [
     { name = "openai" },
     { name = "pdfplumber" },
     { name = "pydantic" },
+    { name = "pypdfium2" },
     { name = "typesafe-sdk" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "httpx2" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "ruff" },
@@ -375,11 +377,13 @@ requires-dist = [
     { name = "openai", specifier = ">=3.34,<4" },
     { name = "pdfplumber", specifier = ">=0.11.10" },
     { name = "pydantic", specifier = ">=2.14.1" },
+    { name = "pypdfium2", specifier = ">=5.14.0" },
     { name = "typesafe-sdk", specifier = ">=0.7.5,<0.8" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "httpx2", specifier = ">=2.13.1" },
     { name = "mypy", specifier = ">=2.4.0" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "ruff", specifier = ">=0.17.1" },

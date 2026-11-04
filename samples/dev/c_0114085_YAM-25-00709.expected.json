@@ -6,5 +6,36 @@
   "subtotal": "17182320",
   "tax": "1718232",
   "total": "18900552",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Green roof installation",
+      "quantity": "260",
+      "unit_price": "27500",
+      "line_total": "7150000.00"
+    },
+    {
+      "description": "Facade scaffolding incl. assembly",
+      "quantity": "734",
+      "unit_price": "1060",
+      "line_total": "778040.00"
+    },
+    {
+      "description": "Wall and roof insulation installation",
+      "quantity": "319",
+      "unit_price": "7590",
+      "line_total": "2421210.00"
+    },
+    {
+      "description": "Interior demolition and waste disposal",
+      "quantity": "915",
+      "unit_price": "6510",
+      "line_total": "5956650.00"
+    },
+    {
+      "description": "Plumber for hydronic connections",
+      "quantity": "54",
+      "unit_price": "16230",
+      "line_total": "876420.00"
+    }
+  ]
 }

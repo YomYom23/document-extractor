@@ -6,5 +6,18 @@
   "subtotal": "22402.07",
   "tax": "3360.31",
   "total": "25762.38",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Abnormal load escort",
+      "quantity": "1",
+      "unit_price": "5721.05",
+      "line_total": "5721.05"
+    },
+    {
+      "description": "Container haulage 40ft {a} depot",
+      "quantity": "2",
+      "unit_price": "8340.51",
+      "line_total": "16681.02"
+    }
+  ]
 }

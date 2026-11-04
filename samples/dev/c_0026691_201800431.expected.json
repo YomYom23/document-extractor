@@ -6,5 +6,30 @@
   "subtotal": "675101.00",
   "tax": null,
   "total": "675101.00",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Security fencing and CCTV for storage site",
+      "quantity": "1",
+      "unit_price": "60128.00",
+      "line_total": "60128.00"
+    },
+    {
+      "description": "Crane pad and hardstand construction",
+      "quantity": "2",
+      "unit_price": "314590.00",
+      "line_total": "597721.00"
+    },
+    {
+      "description": "Pile driving for ground-mount racking",
+      "quantity": "19",
+      "unit_price": "487.50",
+      "line_total": "9262.50"
+    },
+    {
+      "description": "Licensed electrician for AC/DC termination",
+      "quantity": "14.5",
+      "unit_price": "551.00",
+      "line_total": "7989.50"
+    }
+  ]
 }

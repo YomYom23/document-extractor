@@ -6,5 +6,30 @@
   "subtotal": "11726.98",
   "tax": "1759.05",
   "total": "13486.03",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Pallet strapping kit",
+      "quantity": "6",
+      "unit_price": "391.22",
+      "line_total": "2347.32"
+    },
+    {
+      "description": "Hydraulic hose 1/2in, per metre",
+      "quantity": "58",
+      "unit_price": "83.40",
+      "line_total": "4837.20"
+    },
+    {
+      "description": "LED work lamp 24V",
+      "quantity": "1",
+      "unit_price": "261.19",
+      "line_total": "261.19"
+    },
+    {
+      "description": "Toner cartridge, black, high yield",
+      "quantity": "3",
+      "unit_price": "1427.09",
+      "line_total": "4281.27"
+    }
+  ]
 }

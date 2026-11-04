@@ -6,5 +6,54 @@
   "subtotal": "7762.53",
   "tax": "1164.38",
   "total": "8926.91",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "LED Downlight 5W 3000K Warm White",
+      "quantity": "75",
+      "unit_price": "9.71",
+      "line_total": "728.25"
+    },
+    {
+      "description": "Solar Panel Mounting & Wiring",
+      "quantity": "74.8",
+      "unit_price": "61.46",
+      "line_total": "4597.21"
+    },
+    {
+      "description": "3-Phase 200A Main Distribution Board Enclosure",
+      "quantity": "2",
+      "unit_price": "206.49",
+      "line_total": "412.98"
+    },
+    {
+      "description": "Metal Conduit Pipe 25mm",
+      "quantity": "104.7",
+      "unit_price": "4.10",
+      "line_total": "429.27"
+    },
+    {
+      "description": "Heat Shrink Tubing Kit",
+      "quantity": "3",
+      "unit_price": "18.12",
+      "line_total": "54.36"
+    },
+    {
+      "description": "Standard Travel Fee (Within 15km)",
+      "quantity": "1",
+      "unit_price": "35.23",
+      "line_total": "35.23"
+    },
+    {
+      "description": "Journeyman Electrician Labour",
+      "quantity": "4",
+      "unit_price": "91.64",
+      "line_total": "366.56"
+    },
+    {
+      "description": "VoltPro 3x2.5 mm\u00b2 PVC Insulated Copper Cable",
+      "quantity": "461",
+      "unit_price": "2.47",
+      "line_total": "1138.67"
+    }
+  ]
 }

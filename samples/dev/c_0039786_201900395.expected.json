@@ -6,5 +6,12 @@
   "subtotal": "15343.00",
   "tax": null,
   "total": "15343.00",
-  "line_items": null
+  "line_items": [
+    {
+      "description": "Wind Turbine Insurance",
+      "quantity": "1",
+      "unit_price": "15343.00",
+      "line_total": "15343.00"
+    }
+  ]
 }
