@@ -228,14 +228,14 @@ resolver stage like D25's.
 3. A missing date part, or parts that are not a real date, give a null `issue_date`.
 4. Input is the `pdf_reader` page text, the same as the rules extractor.
 5. The prompt is instructions only (D19's label conventions and D11), with no sample text.
-6. Request: low reasoning effort, `max_output_tokens=4000`, `store=False`.
+6. Request: low reasoning effort, `max_output_tokens=16000` (D34.7), `store=False`.
 7. An API error, refusal or incomplete reply raises `LlmExtractionError`; it never becomes guessed values.
 **Scope:** llm_extractor
 **Why:** the SDK turns a `Decimal` field into "number or any string", so formats are enforced as patterns. Asking for one date string made
 the model copy the page's leading digits into the year.
 **Rejected:** one date string with prompt examples, which steer away from the failure instead of removing it.
 **Changes:** D10
-**Changed by:** D28, D33
+**Changed by:** D28, D33, D34
 **Evidence:** [decisions-history.md](decisions-history.md), D26 (live runs and the date diagnosis).
 
 ### D27. Null-source register (active)
@@ -272,6 +272,7 @@ gets an entry in the same commit.
 4. Results come from 3 runs of each billed extractor, at a frozen commit.
 **Scope:** docs, cli, token_usage
 **Why:** measured numbers, not estimates, back the verdict on a hybrid (D5).
+**Changed by:** D34
 **Evidence:** [decisions-history.md](decisions-history.md), D29; [comparison.md](comparison.md).
 
 ### D30. Wider sample set with real invoices (active)
@@ -327,18 +328,41 @@ printed otherwise, and never address parts. Its example suffixes are generic (Lt
    `unit_price` is the printed rate and `line_total` the amount after discount. Zero-amount item rows are lines.
 4. A percentage row has `quantity` = the printed base, null `unit_price`, and the amount as `line_total`. A foreign-currency row has null
    quantity and unit price and `line_total` in the invoice currency.
-5. Scoring: lines pair by identical `line_total` first (duplicates in page order), then by page order. Each pair's 4 fields are scored as
-   header fields, descriptions after D12's normalising. An unpaired labelled line is scored against an all-null prediction; an unpaired
-   predicted line counts each non-null field wrong. Line fields are a separate block in `score`.
+5. Scoring: lines pair by identical `line_total` first; inside a group of equal totals, lines with identical descriptions (after D12's
+   normalising) pair first, then the rest in page order. Leftovers pair by identical description, k-th with k-th in page order. A null
+   `line_total` never pairs by total; a null description never pairs by description. Lines that match neither way stay unpaired. Each
+   pair's 4 fields are scored as header fields, descriptions after D12's normalising. Every field of an unpaired labelled line scores
+   missing and every field of an unpaired predicted line scores wrong, null fields included; each unpaired predicted line is counted as
+   invented. Line fields are a separate block in `score`, printed for the LLM only.
 6. A null label skips the invoice in the line block (the count is printed); a null or `[]` prediction leaves every labelled line unpaired;
    `[]` is not allowed in labels.
 7. One call returns header and lines. `line_total` uses the header money pattern; `quantity` and `unit_price` use `-?\d+(\.\d{1,4})?`.
-   `max_output_tokens` rises to about 16,000; a cut-off reply fails the whole invoice and partial JSON is never used.
-8. Build order: labels, scorer (test-first), LLM schema and prompt, then 3 billed dev runs.
+   `max_output_tokens` is 16,000 (the documented maximum for `gpt-6-luna` is 128,000, checked 2026-11-03); a cut-off reply fails the
+   whole invoice and partial JSON is never used. A cut-off is
+   detected from the reply status before validation, reported as cut off, and metered.
+8. Build order: labels, scorer (test-first), `score` output, LLM schema and prompt, then the billed runs:
+   1. Header baseline: 3 LLM dev runs before any line-item code; a run with a failed extraction is repeated. The guard values are the
+      highest header wrong count and the highest header missing count of the three.
+   2. Baseline line run: 1 dev run with the first full prompt, checked against the guard values; if it exceeds either, the first fix
+      round addresses the header.
+   3. At most 3 fix rounds. A round is one committed change to the prompt or the field descriptions, plus one dev run. Progress means
+      line wrong + missing went down and line wrong did not go up. A run whose only failures are API errors is repeated before it is
+      judged. A round with no progress, a header wrong or missing count above its guard value, or a cut-off or schema failure is
+      reverted and ends the loop. A null currency on `c_0108653` is left out of the header missing count for the guard: a Mexican
+      seller bills a US customer in bare `$`, the USD label comes from the dataset manifest, and null is the D11 answer on that page.
+      A wrong currency there still counts.
+   4. Final runs (D29.4): 3 dev runs, then 3 held-out runs, at the frozen commit (HEAD after the loop's last commit, clean tree, hash
+      recorded before the first final run). No prompt or schema change after held-out is seen; a scorer bug may be fixed and all 6 runs
+      repeated, marked as a re-run.
+   5. Every run's counts and meter line go into the "Line items" section of `comparison.md`, with the spread of the 3 final dev runs
+      and the remaining failures by cause.
 **Scope:** labels, scoring, llm_extractor, cli
 **Why:** line items are most of an invoice's data, and the header-only score says nothing about them.
 **Rejected:** two calls (protects the header, but adds a merge step and meter changes).
-**Changes:** D9, D12
-**Not built yet:** all 58 public invoices have line-item labels (the 25 IEB and 20 Sinabis invoices were labelled last); the 9 private ones
-are deferred. Extraction and scoring wait (paused on 2026-10-29).
-**Evidence:** [decisions-history.md](decisions-history.md), D34; [designs/line-items-brief.md](designs/line-items-brief.md).
+**Changes:** D9, D12, D26, D29
+**Not prompted:** conventions with no dev example stay out of the prompt (D6): a discount printed under an item, carried-forward and
+page-subtotal rows, the before-tax amount on a row with several amounts, and zero-amount rows. Their labels still follow 2 and 3.
+**Deferred:** line-item labels for the 9 private invoices; until they exist, those invoices are skipped in the line block.
+**Evidence:** [decisions-history.md](decisions-history.md), D34; [designs/line-items-brief.md](designs/line-items-brief.md);
+[designs/line-items.md](designs/line-items.md); [comparison.md](comparison.md) ("Line items": header baseline, baseline line run, fix
+round 1, final runs).
