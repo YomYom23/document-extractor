@@ -228,7 +228,7 @@ resolver stage like D25's.
 3. A missing date part, or parts that are not a real date, give a null `issue_date`.
 4. Input is the `pdf_reader` page text, the same as the rules extractor.
 5. The prompt is instructions only (D19's label conventions and D11), with no sample text.
-6. Request: low reasoning effort, `max_output_tokens=4000`, `store=False`.
+6. Request: low reasoning effort, `max_output_tokens=16000` (D34.7), `store=False`.
 7. An API error, refusal or incomplete reply raises `LlmExtractionError`; it never becomes guessed values.
 **Scope:** llm_extractor
 **Why:** the SDK turns a `Decimal` field into "number or any string", so formats are enforced as patterns. Asking for one date string made
@@ -337,7 +337,8 @@ printed otherwise, and never address parts. Its example suffixes are generic (Lt
 6. A null label skips the invoice in the line block (the count is printed); a null or `[]` prediction leaves every labelled line unpaired;
    `[]` is not allowed in labels.
 7. One call returns header and lines. `line_total` uses the header money pattern; `quantity` and `unit_price` use `-?\d+(\.\d{1,4})?`.
-   `max_output_tokens` rises to about 16,000; a cut-off reply fails the whole invoice and partial JSON is never used. A cut-off is
+   `max_output_tokens` is 16,000 (the documented maximum for `gpt-6-luna` is 128,000, checked 2026-11-03); a cut-off reply fails the
+   whole invoice and partial JSON is never used. A cut-off is
    detected from the reply status before validation, reported as cut off, and metered.
 8. Build order: labels, scorer (test-first), `score` output, LLM schema and prompt, then the billed runs:
    1. Header baseline: 3 LLM dev runs before any line-item code; a run with a failed extraction is repeated. The guard values are the
@@ -357,7 +358,9 @@ printed otherwise, and never address parts. Its example suffixes are generic (Lt
 **Why:** line items are most of an invoice's data, and the header-only score says nothing about them.
 **Rejected:** two calls (protects the header, but adds a merge step and meter changes).
 **Changes:** D9, D12, D26, D29
+**Not prompted:** conventions with no dev example stay out of the prompt (D6): a discount printed under an item, carried-forward and
+page-subtotal rows, the before-tax amount on a row with several amounts, and zero-amount rows. Their labels still follow 2 and 3.
 **Not built yet:** all 58 public invoices have line-item labels (the 25 IEB and 20 Sinabis invoices were labelled last); the 9 private ones
-are deferred. Extraction and scoring wait (paused on 2026-10-29).
+are deferred. Extraction, scoring and the `score` line block are built; the billed runs from 8.2 on are not done.
 **Evidence:** [decisions-history.md](decisions-history.md), D34; [designs/line-items-brief.md](designs/line-items-brief.md);
 [designs/line-items.md](designs/line-items.md).

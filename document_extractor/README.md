@@ -27,7 +27,8 @@ there; the old log, with live runs and diagnoses, is
 - `jev.py`: `Jev.ask(state, questions)` and `JevError`. The only module that
   calls TypeSafe.
 - `llm_extractor.py`: `LlmExtractor.extract` / `extract_from_text`,
-  `LlmInvoice`, `to_invoice`, `issue_date_from_parts`, `LlmExtractionError`,
+  `LlmInvoice`, `LlmLineItem`, `TEXT_FORMAT`, `to_invoice`,
+  `decimal_from_text`, `issue_date_from_parts`, `LlmExtractionError`,
   `DEFAULT_MODEL` and its per-million-token prices.
 - `scoring.py`: `score_invoice`, `score_field`, `score_dataset`,
   `DatasetScore`, `Outcome` (`correct`, `missing`, `wrong`), `HEADER_FIELDS`;
@@ -54,8 +55,8 @@ there; the old log, with live runs and diagnoses, is
 - Only `pdf_reader.py` imports a PDF library, only `jev.py` builds a
   `TypeSafeClient` and calls Jev (other modules import only the `Choice` and
   `ChoiceAnswer` types), and only `llm_extractor.py` imports OpenAI.
-- Line items are in the schema but not extracted yet: every extractor returns
-  `line_items=None`. The scorer pairs and scores line items as a separate
+- Only the LLM extracts line items, in the same call as the header; the rules
+  extractors return `line_items=None` as the baseline (D34.1). The scorer pairs and scores line items as a separate
   block (`score_lines`, D34.5). `score --extractor llm` prints it per invoice
   and after the header counts; rules and rules-jev output is unchanged.
 - Line pairing uses identical totals and identical descriptions only, with
@@ -65,7 +66,9 @@ there; the old log, with live runs and diagnoses, is
   currency the rules found, and only runs when the page has a bare `$` (D25).
 - A Jev failure leaves the currency `None`. An LLM failure raises
   `LlmExtractionError`; `score` counts it as a failed extraction and scores
-  the invoice as all-null (D26).
+  the invoice as all-null (D26). A cut-off reply is read from the status
+  before the JSON is validated, so it is reported as cut off and its tokens
+  are metered; partial JSON is never used (D34.7).
 - The LLM prompt contains instructions only, no examples from the samples, and
   held-out text never reaches it (D6). Held-out is scored only when asked for
   with `--set heldout`.
