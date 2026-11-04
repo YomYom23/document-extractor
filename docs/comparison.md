@@ -272,3 +272,38 @@ llm             38 replies, 61379 input + 19211 output tokens, $0.015743 at gpt-
 
 The loop ended after round 1 (owner decision, 2026-11-03): the prompt already asks for wrapped descriptions to be joined, so a second
 round could only tune it to one row. The frozen commit for the final runs (D34.8.4) is the commit that adds this record.
+
+### Final runs, 2026-11-03
+
+Frozen commit `0c478bc`, clean tree. Three LLM dev runs, then three held-out runs (D34.8.4, D29.4). 0 failed extractions and no cut-off
+in all six; every labelled row paired by total in every run, none invented.
+
+| Run | Header correct / missing / wrong | Lines correct / missing / wrong | Wrong by field | Output tokens | Cost |
+| --- | --- | --- | --- | --- | --- |
+| dev 1 | 266 / 0 / 0 | 1157 / 0 / 3 | description 2, unit_price 1 | 19,395 | $0.015835 |
+| dev 2 | 266 / 0 / 0 | 1157 / 0 / 3 | description 2, unit_price 1 | 17,354 | $0.014815 |
+| dev 3 | 266 / 0 / 0 | 1158 / 0 / 2 | description 1, unit_price 1 | 18,984 | $0.015630 |
+| held-out 1 | 203 / 0 / 0 | 710 / 0 / 2 | description 2 | 11,801 | $0.010478 |
+| held-out 2 | 203 / 0 / 0 | 710 / 0 / 2 | description 2 | 13,017 | $0.011086 |
+| held-out 3 | 202 / 0 / 1 | 709 / 0 / 3 | description 3 | 12,596 | $0.010875 |
+
+Dev: 38 invoices, 290 labelled rows (1,160 line fields), 2 private invoices skipped (no line labels). Held-out: 29 invoices, 178 rows
+(712 line fields), 7 private invoices skipped. Input tokens per run: 61,379 dev, 45,774 held-out. The six runs cost $0.078719.
+
+- Spread: dev line wrong 2 to 3, held-out 2 to 3; line missing 0 in all six. The header is 266 / 0 / 0 in every dev run, as in the
+  header baseline; `c_0108653`'s currency came back correct in all three.
+- Every quantity and line total is correct in all six runs, and every held-out unit price.
+
+Remaining failures by cause:
+
+- Wrapped code tail joined to the description (dev, 1 row in runs 1 and 2, a different invoice each time): the item code wraps onto
+  the next line (`SUB-BLD-GREENR` / `OOF`), and the model adds the orphan fragment to the description. It is the other side of round 1's
+  "join a description that wraps" rule.
+- Wrapped date not joined (dev, every run): `c_0073610` row 7, as in round 1.
+- Percentage rate as `unit_price` (dev, 1 row per run, a different invoice each time): on a percentage row the model gave the printed
+  rate (22.50, 1.80, 1.25) where the label and the prompt have null.
+- Stray characters in a description (held-out, every run): `c_0084928` rows 3 and 4 gain a one-character fragment (`8`, `E`) inside
+  the description. The held-out PDFs were not opened to confirm a cause (D6).
+- Unit kept in the description (held-out run 3): `c_0040087` row 13 kept a quantity and unit (`4 pcs`).
+- Header (held-out run 3): `a_currency-multi-line-nad`'s `vendor_name` came back with characters of the page's `TAX INVOICE` title mixed
+  into its last word; correct in runs 1 and 2.
