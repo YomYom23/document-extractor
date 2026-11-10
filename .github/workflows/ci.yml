@@ -1,0 +1,46 @@
+# The D13 checks on every push to main and every pull request: pytest, ruff
+# and mypy all clean. No secrets: the tests fake every OpenAI and TypeSafe
+# call, and the git-ignored private samples are skipped when absent (D30).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or PR cancels the run still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      # --locked fails if uv.lock is out of date with pyproject.toml, so CI
+      # tests exactly the versions that were committed.
+      - name: Install
+        run: uv sync --locked
+
+      - name: Tests
+        run: uv run pytest
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run mypy .
