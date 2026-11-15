@@ -210,7 +210,7 @@ The runs of the D34.8 loop: header baseline, baseline line run, fix rounds and f
 
 ### Header baseline, 2026-11-03
 
-Commit `2c7049b`, before any line-item code. Three LLM dev runs (D34.8.1), 38 invoices each, 0 failed extractions in every run.
+Commit `f2d9f85`, before any line-item code. Three LLM dev runs (D34.8.1), 38 invoices each, 0 failed extractions in every run.
 
 | Run | Correct | Missing | Wrong | Calls | Input + output tokens | Cost |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -223,7 +223,7 @@ was null in the D33 run. A later run with any header wrong or missing value is o
 
 ### Baseline line run, 2026-11-03
 
-Commit `21167f1`, the first full line-item prompt (D34.8.2). One LLM dev run, 38 invoices, 0 failed extractions.
+Commit `ccd0a1c`, the first full line-item prompt (D34.8.2). One LLM dev run, 38 invoices, 0 failed extractions.
 
 ```text
 overall         correct 265  missing 1  wrong 0
@@ -251,8 +251,8 @@ llm             38 replies, 59935 input + 18197 output tokens, $0.015092 at gpt-
 
 ### Fix round 1, 2026-11-03 (kept)
 
-Before the round, D34.8.3 was amended (commit `8c74c4f`, owner decision): a null currency on `c_0108653` no longer counts against the
-header missing guard; a wrong one still does. Round 1, commit `da106bb`, rewrote the prompt's description rule: keep model numbers,
+Before the round, D34.8.3 was amended (commit `cb6426e`, owner decision): a null currency on `c_0108653` no longer counts against the
+header missing guard; a wrong one still does. Round 1, commit `4afa08f`, rewrote the prompt's description rule: keep model numbers,
 sizes, pack counts, percentages and dates that are part of the description, and leave out only codes, position numbers and units printed
 in a column of their own. One LLM dev run, 38 invoices, 0 failed extractions.
 
@@ -282,7 +282,7 @@ round could only tune it to one row. The frozen commit for the final runs (D34.8
 
 ### Final runs, 2026-11-03
 
-Frozen commit `0c478bc`, clean tree. Three LLM dev runs, then three held-out runs (D34.8.4, D29.4). 0 failed extractions and no cut-off
+Frozen commit `5f701ab`, clean tree. Three LLM dev runs, then three held-out runs (D34.8.4, D29.4). 0 failed extractions and no cut-off
 in all six; every labelled row paired by total in every run, none invented.
 
 | Run | Header correct / missing / wrong | Lines correct / missing / wrong | Wrong by field | Output tokens | Cost |
