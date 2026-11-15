@@ -1,4 +1,4 @@
-Read @README.md before working in this directory. It lists the public interface, the invariants to keep and the side effects.
+Read @BLUEPRINT.md before working in this directory. It lists the public interface, the invariants to keep and the side effects.
 
 The decision index, one line per decision in `docs/decisions.md`: @docs/decisions-index.md
 
