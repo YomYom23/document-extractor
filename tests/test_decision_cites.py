@@ -11,6 +11,7 @@ NULL_SOURCES = REPO / "docs" / "null-sources.md"
 SCANNED_GLOBS = ("document_extractor/*.py", "tests/*.py", "scripts/*.py")
 SCANNED_FILES = (
     "README.md",
+    "BLUEPRINT.md",
     "document_extractor/README.md",
     "scripts/README.md",
     "CLAUDE.md",
