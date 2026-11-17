@@ -128,7 +128,7 @@ uv run document-extractor --help
 
 ## Samples
 
-`samples/dev/` and `samples/heldout/` hold PDFs from two public invoice datasets, each with a hand-written `<name>.expected.json` label. Sources and licences (CC BY 4.0 and MIT) are in [samples/ATTRIBUTION.md](samples/ATTRIBUTION.md). The real invoices live in the git-ignored `samples/private/` and are not distributed.
+`samples/dev/` and `samples/heldout/` hold PDFs from two public invoice datasets, each with a hand-written `<name>.expected.json` label. Sources and credits are in [samples/ATTRIBUTION.md](samples/ATTRIBUTION.md). The real invoices live in the git-ignored `samples/private/` and are not distributed.
 
 ## Tests
 
@@ -139,7 +139,3 @@ uv run mypy .
 ```
 
 Network calls to OpenAI and TypeSafe are faked in tests. The billed live check in `scripts/` is run by hand only.
-
-## License
-
-Copyright (c) 2026 Yomi Lebi. All rights reserved. This code is shared for viewing only; it may not be copied, modified or reused without permission.
